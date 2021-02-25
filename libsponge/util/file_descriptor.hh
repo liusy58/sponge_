@@ -9,7 +9,8 @@
 #include <memory>
 
 //! A reference-counted handle to a file descriptor
-class FileDescriptor {
+class
+    FileDescriptor {
     //! \brief A handle on a kernel file descriptor.
     //! \details FileDescriptor objects contain a std::shared_ptr to a FDWrapper.
     class FDWrapper {
