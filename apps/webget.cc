@@ -6,6 +6,16 @@
 
 using namespace std;
 
+
+/*
+
+how to fetch a page?
+1. GET /hello HTTP/1.1
+2. Host: cs144.keithw.org
+3. Connection:  close
+4. \n\n
+*/
+
 void get_URL(const string &host, const string &path) {
     // Your code here.
 
@@ -22,12 +32,7 @@ void get_URL(const string &host, const string &path) {
     Address address(host,"http");
     TCPSocket socket;
     socket.connect(address);
-    string request="GET "+ path + " HTTP/1.1\r\n";
-    request += "HOST: " + host + "\r\n";
-    request += "Connection: close\r\n";
-    request+="\n\n";
-
-    cout<<request;
+    string request="GET "+ path + " HTTP/1.1\r\n" + "HOST: " + host + "\r\n" +"Connection: close\r\n" + "\r\n\r\n";;
     socket.write(request);
     while(!socket.eof()){
         auto reply = socket.read();

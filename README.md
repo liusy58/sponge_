@@ -84,3 +84,51 @@ To format (you'll need `clang-format`):
 To see all available targets,
 
     $ make help
+
+
+## Notes
+
+### `webget`
+
+```diff
+diff --git a/apps/webget.cc b/apps/webget.cc
+index 3b85ce3..288e272 100644
+--- a/apps/webget.cc
++++ b/apps/webget.cc
+@@ -6,6 +6,16 @@
+ 
+ using namespace std;
+ 
++
++/*
++
++how to fetch a page?
++1. GET /hello HTTP/1.1
++2. Host: cs144.keithw.org
++3. Connection:  close
++4. \n\n
++*/
++
+ void get_URL(const string &host, const string &path) {
+     // Your code here.
+ 
+@@ -17,8 +27,18 @@ void get_URL(const string &host, const string &path) {
+     // (not just one call to read() -- everything) until you reach
+     // the "eof" (end of file).
+ 
+-    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+-    cerr << "Warning: get_URL() has not been implemented yet.\n";
++//    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
++//    cerr << "Warning: get_URL() has not been implemented yet.\n";
++    Address address(host,"http");
++    TCPSocket socket;
++    socket.connect(address);
++    string request="GET "+ path + " HTTP/1.1\r\n" + "HOST: " + host + "\r\n" +"Connection: close\r\n" + "\r\n\r\n";;
++    socket.write(request);
++    while(!socket.eof()){
++        auto reply = socket.read();
++        cout<<reply;
++    }
++
+ }
+```
