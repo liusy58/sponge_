@@ -1,183 +1,334 @@
-diff --git a/.idea/.gitignore b/.idea/.gitignore
-new file mode 100644
-index 0000000..73f69e0
---- /dev/null
-+++ b/.idea/.gitignore
-@@ -0,0 +1,8 @@
-+# Default ignored files
-+/shelf/
-+/workspace.xml
-+# Datasource local storage ignored files
-+/dataSources/
-+/dataSources.local.xml
-+# Editor-based HTTP Client requests
-+/httpRequests/
-diff --git a/.idea/.name b/.idea/.name
-new file mode 100644
-index 0000000..b183e60
---- /dev/null
-+++ b/.idea/.name
-@@ -0,0 +1 @@
-+Sponge
-\ No newline at end of file
-diff --git a/.idea/codeStyles/Project.xml b/.idea/codeStyles/Project.xml
-new file mode 100644
-index 0000000..f603881
---- /dev/null
-+++ b/.idea/codeStyles/Project.xml
-@@ -0,0 +1,7 @@
-+<component name="ProjectCodeStyleConfiguration">
-+  <code_scheme name="Project" version="173">
-+    <clangFormatSettings>
-+      <option name="ENABLED" value="true" />
-+    </clangFormatSettings>
-+  </code_scheme>
-+</component>
-\ No newline at end of file
-diff --git a/.idea/codeStyles/codeStyleConfig.xml b/.idea/codeStyles/codeStyleConfig.xml
-new file mode 100644
-index 0000000..79ee123
---- /dev/null
-+++ b/.idea/codeStyles/codeStyleConfig.xml
-@@ -0,0 +1,5 @@
-+<component name="ProjectCodeStyleConfiguration">
-+  <state>
-+    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
-+  </state>
-+</component>
-\ No newline at end of file
-diff --git a/.idea/misc.xml b/.idea/misc.xml
-new file mode 100644
-index 0000000..79b3c94
---- /dev/null
-+++ b/.idea/misc.xml
-@@ -0,0 +1,4 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
-+</project>
-\ No newline at end of file
-diff --git a/.idea/modules.xml b/.idea/modules.xml
-new file mode 100644
-index 0000000..f244a7f
---- /dev/null
-+++ b/.idea/modules.xml
-@@ -0,0 +1,8 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="ProjectModuleManager">
-+    <modules>
-+      <module fileurl="file://$PROJECT_DIR$/.idea/sponge.iml" filepath="$PROJECT_DIR$/.idea/sponge.iml" />
-+    </modules>
-+  </component>
-+</project>
-\ No newline at end of file
-diff --git a/.idea/sponge.iml b/.idea/sponge.iml
-new file mode 100644
-index 0000000..f08604b
---- /dev/null
-+++ b/.idea/sponge.iml
-@@ -0,0 +1,2 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<module classpath="CMake" type="CPP_MODULE" version="4" />
-\ No newline at end of file
-diff --git a/.idea/vcs.xml b/.idea/vcs.xml
-new file mode 100644
-index 0000000..94a25f7
---- /dev/null
-+++ b/.idea/vcs.xml
-@@ -0,0 +1,6 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<project version="4">
-+  <component name="VcsDirectoryMappings">
-+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
-+  </component>
-+</project>
-\ No newline at end of file
-diff --git a/README.md b/README.md
-index 0b69d09..6d47b9a 100644
---- a/README.md
-+++ b/README.md
-@@ -84,3 +84,12 @@ To format (you'll need `clang-format`):
- To see all available targets,
+diff --git a/diff.txt b/diff.txt
+index ce7a7a4..e69de29 100644
+--- a/diff.txt
++++ b/diff.txt
+@@ -1,183 +0,0 @@
+-diff --git a/.idea/.gitignore b/.idea/.gitignore
+-new file mode 100644
+-index 0000000..73f69e0
+---- /dev/null
+-+++ b/.idea/.gitignore
+-@@ -0,0 +1,8 @@
+-+# Default ignored files
+-+/shelf/
+-+/workspace.xml
+-+# Datasource local storage ignored files
+-+/dataSources/
+-+/dataSources.local.xml
+-+# Editor-based HTTP Client requests
+-+/httpRequests/
+-diff --git a/.idea/.name b/.idea/.name
+-new file mode 100644
+-index 0000000..b183e60
+---- /dev/null
+-+++ b/.idea/.name
+-@@ -0,0 +1 @@
+-+Sponge
+-\ No newline at end of file
+-diff --git a/.idea/codeStyles/Project.xml b/.idea/codeStyles/Project.xml
+-new file mode 100644
+-index 0000000..f603881
+---- /dev/null
+-+++ b/.idea/codeStyles/Project.xml
+-@@ -0,0 +1,7 @@
+-+<component name="ProjectCodeStyleConfiguration">
+-+  <code_scheme name="Project" version="173">
+-+    <clangFormatSettings>
+-+      <option name="ENABLED" value="true" />
+-+    </clangFormatSettings>
+-+  </code_scheme>
+-+</component>
+-\ No newline at end of file
+-diff --git a/.idea/codeStyles/codeStyleConfig.xml b/.idea/codeStyles/codeStyleConfig.xml
+-new file mode 100644
+-index 0000000..79ee123
+---- /dev/null
+-+++ b/.idea/codeStyles/codeStyleConfig.xml
+-@@ -0,0 +1,5 @@
+-+<component name="ProjectCodeStyleConfiguration">
+-+  <state>
+-+    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
+-+  </state>
+-+</component>
+-\ No newline at end of file
+-diff --git a/.idea/misc.xml b/.idea/misc.xml
+-new file mode 100644
+-index 0000000..79b3c94
+---- /dev/null
+-+++ b/.idea/misc.xml
+-@@ -0,0 +1,4 @@
+-+<?xml version="1.0" encoding="UTF-8"?>
+-+<project version="4">
+-+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+-+</project>
+-\ No newline at end of file
+-diff --git a/.idea/modules.xml b/.idea/modules.xml
+-new file mode 100644
+-index 0000000..f244a7f
+---- /dev/null
+-+++ b/.idea/modules.xml
+-@@ -0,0 +1,8 @@
+-+<?xml version="1.0" encoding="UTF-8"?>
+-+<project version="4">
+-+  <component name="ProjectModuleManager">
+-+    <modules>
+-+      <module fileurl="file://$PROJECT_DIR$/.idea/sponge.iml" filepath="$PROJECT_DIR$/.idea/sponge.iml" />
+-+    </modules>
+-+  </component>
+-+</project>
+-\ No newline at end of file
+-diff --git a/.idea/sponge.iml b/.idea/sponge.iml
+-new file mode 100644
+-index 0000000..f08604b
+---- /dev/null
+-+++ b/.idea/sponge.iml
+-@@ -0,0 +1,2 @@
+-+<?xml version="1.0" encoding="UTF-8"?>
+-+<module classpath="CMake" type="CPP_MODULE" version="4" />
+-\ No newline at end of file
+-diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+-new file mode 100644
+-index 0000000..94a25f7
+---- /dev/null
+-+++ b/.idea/vcs.xml
+-@@ -0,0 +1,6 @@
+-+<?xml version="1.0" encoding="UTF-8"?>
+-+<project version="4">
+-+  <component name="VcsDirectoryMappings">
+-+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+-+  </component>
+-+</project>
+-\ No newline at end of file
+-diff --git a/README.md b/README.md
+-index 0b69d09..6d47b9a 100644
+---- a/README.md
+-+++ b/README.md
+-@@ -84,3 +84,12 @@ To format (you'll need `clang-format`):
+- To see all available targets,
+- 
+-     $ make help
+-+
+-+
+-+## Notes
+-+
+-+### `webget`
+-+
+-+```diff
+-+
+-+```
+-\ No newline at end of file
+-diff --git a/apps/webget.cc b/apps/webget.cc
+-index 3b85ce3..288e272 100644
+---- a/apps/webget.cc
+-+++ b/apps/webget.cc
+-@@ -6,6 +6,16 @@
+- 
+- using namespace std;
+- 
+-+
+-+/*
+-+
+-+how to fetch a page?
+-+1. GET /hello HTTP/1.1
+-+2. Host: cs144.keithw.org
+-+3. Connection:  close
+-+4. \n\n
+-+*/
+-+
+- void get_URL(const string &host, const string &path) {
+-     // Your code here.
+- 
+-@@ -17,8 +27,18 @@ void get_URL(const string &host, const string &path) {
+-     // (not just one call to read() -- everything) until you reach
+-     // the "eof" (end of file).
+- 
+--    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+--    cerr << "Warning: get_URL() has not been implemented yet.\n";
+-+//    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+-+//    cerr << "Warning: get_URL() has not been implemented yet.\n";
+-+    Address address(host,"http");
+-+    TCPSocket socket;
+-+    socket.connect(address);
+-+    string request="GET "+ path + " HTTP/1.1\r\n" + "HOST: " + host + "\r\n" +"Connection: close\r\n" + "\r\n\r\n";;
+-+    socket.write(request);
+-+    while(!socket.eof()){
+-+        auto reply = socket.read();
+-+        cout<<reply;
+-+    }
+-+
+- }
+- 
+- int main(int argc, char *argv[]) {
+-diff --git a/libsponge/util/file_descriptor.hh b/libsponge/util/file_descriptor.hh
+-index 37d9ad8..2e3174b 100644
+---- a/libsponge/util/file_descriptor.hh
+-+++ b/libsponge/util/file_descriptor.hh
+-@@ -9,7 +9,8 @@
+- #include <memory>
+- 
+- //! A reference-counted handle to a file descriptor
+--class FileDescriptor {
+-+class
+-+    FileDescriptor {
+-     //! \brief A handle on a kernel file descriptor.
+-     //! \details FileDescriptor objects contain a std::shared_ptr to a FDWrapper.
+-     class FDWrapper {
+-diff --git a/libsponge/util/tun.cc b/libsponge/util/tun.cc
+-index 80418a1..c662616 100644
+---- a/libsponge/util/tun.cc
+-+++ b/libsponge/util/tun.cc
+-@@ -4,6 +4,8 @@
+- 
+- #include <cstring>
+- #include <fcntl.h>
+-+#include <sys/socket.h>
+-+#include <sys/types.h>
+- #include <linux/if.h>
+- #include <linux/if_tun.h>
+- #include <sys/ioctl.h>
+diff --git a/libsponge/byte_stream.cc b/libsponge/byte_stream.cc
+index 826e028..df687c6 100644
+--- a/libsponge/byte_stream.cc
++++ b/libsponge/byte_stream.cc
+@@ -9,45 +9,86 @@
  
-     $ make help
-+
-+
-+## Notes
-+
-+### `webget`
-+
-+```diff
-+
-+```
-\ No newline at end of file
-diff --git a/apps/webget.cc b/apps/webget.cc
-index 3b85ce3..288e272 100644
---- a/apps/webget.cc
-+++ b/apps/webget.cc
-@@ -6,6 +6,16 @@
- 
+ template <typename... Targs>
+ void DUMMY_CODE(Targs &&... /* unused */) {}
+-
++#include <iostream>
  using namespace std;
  
+-ByteStream::ByteStream(const size_t capacity) { DUMMY_CODE(capacity); }
++ByteStream::ByteStream(const size_t capacity):_capacity(capacity), _input_ended(0),_bytes_read(0),_bytes_write(0),_eof(0){}
 +
-+/*
-+
-+how to fetch a page?
-+1. GET /hello HTTP/1.1
-+2. Host: cs144.keithw.org
-+3. Connection:  close
-+4. \n\n
-+*/
-+
- void get_URL(const string &host, const string &path) {
-     // Your code here.
  
-@@ -17,8 +27,18 @@ void get_URL(const string &host, const string &path) {
-     // (not just one call to read() -- everything) until you reach
-     // the "eof" (end of file).
- 
--    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
--    cerr << "Warning: get_URL() has not been implemented yet.\n";
-+//    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-+//    cerr << "Warning: get_URL() has not been implemented yet.\n";
-+    Address address(host,"http");
-+    TCPSocket socket;
-+    socket.connect(address);
-+    string request="GET "+ path + " HTTP/1.1\r\n" + "HOST: " + host + "\r\n" +"Connection: close\r\n" + "\r\n\r\n";;
-+    socket.write(request);
-+    while(!socket.eof()){
-+        auto reply = socket.read();
-+        cout<<reply;
++// Write a string of bytes into the stream. 
++//Write as many as will fit, and return the number of bytes written.
+ size_t ByteStream::write(const string &data) {
+-    DUMMY_CODE(data);
+-    return {};
++    auto len = min(data.size(),remaining_capacity());
++    size_t i=0;
++    for(auto c:data){
++        if(i>=len){
++            break;
++        }
++        _buffer.push_back(c);
++        ++i;
 +    }
-+
++    _bytes_write += len;
++    return len;
  }
  
- int main(int argc, char *argv[]) {
-diff --git a/libsponge/util/file_descriptor.hh b/libsponge/util/file_descriptor.hh
-index 37d9ad8..2e3174b 100644
---- a/libsponge/util/file_descriptor.hh
-+++ b/libsponge/util/file_descriptor.hh
-@@ -9,7 +9,8 @@
- #include <memory>
+ //! \param[in] len bytes will be copied from the output side of the buffer
+ string ByteStream::peek_output(const size_t len) const {
+-    DUMMY_CODE(len);
+-    return {};
++    auto nbytes = min(len,_buffer.size());
++    return string(_buffer.begin(),_buffer.begin()+nbytes);
+ }
  
- //! A reference-counted handle to a file descriptor
--class FileDescriptor {
-+class
-+    FileDescriptor {
-     //! \brief A handle on a kernel file descriptor.
-     //! \details FileDescriptor objects contain a std::shared_ptr to a FDWrapper.
-     class FDWrapper {
-diff --git a/libsponge/util/tun.cc b/libsponge/util/tun.cc
-index 80418a1..c662616 100644
---- a/libsponge/util/tun.cc
-+++ b/libsponge/util/tun.cc
-@@ -4,6 +4,8 @@
+ //! \param[in] len bytes will be removed from the output side of the buffer
+-void ByteStream::pop_output(const size_t len) { DUMMY_CODE(len); }
++void ByteStream::pop_output(const size_t len) {
++    auto nbytes = min(len,_buffer.size());
++    _bytes_read += nbytes;
++    while(nbytes--){
++        _buffer.pop_front();
++    }
++    if(_input_ended&&_buffer.empty()){
++        _eof=1;
++    }
++ }
  
- #include <cstring>
- #include <fcntl.h>
-+#include <sys/socket.h>
-+#include <sys/types.h>
- #include <linux/if.h>
- #include <linux/if_tun.h>
- #include <sys/ioctl.h>
+ //! Read (i.e., copy and then pop) the next "len" bytes of the stream
+ //! \param[in] len bytes will be popped and returned
+ //! \returns a string
+ std::string ByteStream::read(const size_t len) {
+-    DUMMY_CODE(len);
+-    return {};
++    string str=peek_output(len);
++    pop_output(len);
++    return str;
+ }
+ 
+-void ByteStream::end_input() {}
++void ByteStream::end_input() {
++    _input_ended = true;
++    if(_buffer.empty()){
++        _eof=1;
++    }
++}
+ 
+-bool ByteStream::input_ended() const { return {}; }
++bool ByteStream::input_ended() const { 
++    return _input_ended;
++ }
+ 
+-size_t ByteStream::buffer_size() const { return {}; }
++size_t ByteStream::buffer_size() const { 
++    return _buffer.size();
++ }
+ 
+-bool ByteStream::buffer_empty() const { return {}; }
++bool ByteStream::buffer_empty() const { 
++    return _buffer.empty();    
++ }
+ 
+-bool ByteStream::eof() const { return false; }
++bool ByteStream::eof() const { 
++    return _eof;
++ }
+ 
+-size_t ByteStream::bytes_written() const { return {}; }
++size_t ByteStream::bytes_written() const { 
++    return _bytes_write;
++ }
+ 
+-size_t ByteStream::bytes_read() const { return {}; }
++size_t ByteStream::bytes_read() const { 
++    return _bytes_read;
++ }
+ 
+-size_t ByteStream::remaining_capacity() const { return {}; }
++size_t ByteStream::remaining_capacity() const { 
++    return _capacity - _buffer.size();
++ }
+diff --git a/libsponge/byte_stream.hh b/libsponge/byte_stream.hh
+index 71317c2..a361826 100644
+--- a/libsponge/byte_stream.hh
++++ b/libsponge/byte_stream.hh
+@@ -2,6 +2,7 @@
+ #define SPONGE_LIBSPONGE_BYTE_STREAM_HH
+ 
+ #include <string>
++#include <deque>
+ 
+ //! \brief An in-order byte stream.
+ 
+@@ -18,6 +19,13 @@ class ByteStream {
+     // different approaches.
+ 
+     bool _error{};  //!< Flag indicating that the stream suffered an error.
++    std::deque<char>_buffer{};
++    size_t _capacity;
++    bool _input_ended;
++    size_t _bytes_read;
++    size_t _bytes_write;
++    bool _eof;
++
+ 
+   public:
+     //! Construct a stream with room for `capacity` bytes.
+diff --git a/update.sh b/update.sh
+index bbc2c71..357f4d7 100644
+--- a/update.sh
++++ b/update.sh
+@@ -2,4 +2,4 @@
+ 
+ git add .;
+ git commit -m "update on `date +'%Y-%m-%d %H:%M:%S'`";
+-git push ;
+\ No newline at end of file
++git push lsy lab0;
+\ No newline at end of file
