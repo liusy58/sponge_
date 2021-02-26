@@ -1,5 +1,6 @@
 #include "stream_reassembler.hh"
-
+#include <iostream>
+#include <algorithm>
 // Dummy implementation of a stream reassembler.
 
 // For Lab 1, please replace with a real implementation that passes the
@@ -92,7 +93,14 @@ int StreamReassembler::type_overlap(Data data1,Data data2){
 }
 
 void StreamReassembler::push2list(const string &data, const size_t index){
-    Data new_data(index,data);
+    string str = data;
+    size_t i = index;
+    if(index < _first_unread){
+        size_t len = _first_unread - index;
+        str=str.substr(len);
+        i = _first_unread;
+    }
+    Data new_data(i,str);
     for(auto iter = _data_list.begin();iter!=_data_list.end();){
         int type = type_overlap(new_data,*iter);
         if(!type){
@@ -118,14 +126,17 @@ void StreamReassembler::push2list(const string &data, const size_t index){
             size_t len = index + data.size() - _index;
             _unassembled_bytes -= len;
             _data = _data.substr(len);
-            return;
+            _index += len;
         }
 
     }
+    
     _data_list.push_back(new_data);
+    _unassembled_bytes += new_data._data.size();
 
 }
 void StreamReassembler::write2stream(){
+    std::sort(_data_list.begin(),_data_list.end(),[](Data&d1,Data&d2){return d1._start_index<d2._start_index;});
     for(auto iter = _data_list.begin();iter!=_data_list.end()&&_output.remaining_capacity()>0;){
         auto &_index = iter->_start_index;
         auto &_data = iter->_data;
@@ -137,6 +148,7 @@ void StreamReassembler::write2stream(){
             }else{
                 iter = _data_list.erase(iter);
             }
+            _unassembled_bytes -= bytes;
             _first_unread += bytes;
         }else{
             iter++;
