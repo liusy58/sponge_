@@ -5,16 +5,30 @@
 
 #include <cstdint>
 #include <string>
-
+#include <vector>
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
+    class Data{
+      public:
+        uint64_t _start_index;
+        std::string _data;
+        Data(uint64_t start_index,std::string data):_start_index(start_index),_data(data){}
+    };
+
     // Your code here -- add private members as necessary.
 
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
-
+    size_t _unassembled_bytes;  //!< The number of bytes not assembled
+    uint64_t _first_unread;
+    bool _eof;
+    std::vector<Data> _data_list{};
+    // the data1 is the new data
+    int type_overlap(Data data1,Data data2);
+    void push2list(const string &data, const size_t index);
+    void write2stream();
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
