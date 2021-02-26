@@ -24,10 +24,11 @@ class StreamReassembler {
     size_t _unassembled_bytes;  //!< The number of bytes not assembled
     uint64_t _first_unread;
     bool _eof;
+    uint64_t _last_acceptable;
     std::vector<Data> _data_list{};
     // the data1 is the new data
     int type_overlap(Data data1,Data data2);
-    void push2list(const string &data, const size_t index);
+    void push2list(const std::string &data, const size_t index);
     void write2stream();
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.

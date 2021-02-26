@@ -12,22 +12,31 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),
-_first_unread(0),_eof(false) {}
+StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),_unassembled_bytes(0),
+_first_unread(0),_eof(false),_last_acceptable(0) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
+    if(eof){
+        _eof=1;
+        _last_acceptable = index +data.size();
+    }
     // receive data that has already assembled
     if(data.empty()||data.size()+index-1<_first_unread){
+        write2stream();
         return;
     }
-    int first_unacceptable = _first_unread + _capacity ;
+    size_t first_unacceptable = _first_unread + _capacity ;
     if(index>=first_unacceptable){
+        write2stream();
         //? what if eof?
         return;
     }
+
+    push2list(data,index);
+    write2stream();
 }
 
 size_t StreamReassembler::unassembled_bytes() const { 
@@ -79,6 +88,7 @@ int StreamReassembler::type_overlap(Data data1,Data data2){
     if(start1<=start2&&end1<=end2){
         return 4;
     }
+    return 5;
 }
 
 void StreamReassembler::push2list(const string &data, const size_t index){
@@ -112,6 +122,7 @@ void StreamReassembler::push2list(const string &data, const size_t index){
         }
 
     }
+    _data_list.push_back(new_data);
 
 }
 void StreamReassembler::write2stream(){
@@ -120,13 +131,19 @@ void StreamReassembler::write2stream(){
         auto &_data = iter->_data;
         if(_index == _first_unread){
             auto bytes = _output.write(_data);
-            if(bytes=_data.size()){
+            if(bytes != _data.size()){
                 _index += bytes;
                 _data = _data.substr(bytes);
             }else{
                 iter = _data_list.erase(iter);
             }
             _first_unread += bytes;
+        }else{
+            iter++;
         }
     }
+    if(_eof&&_last_acceptable == _first_unread&&_data_list.empty()){
+        _output.end_input();
+    }
+
 }
