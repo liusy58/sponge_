@@ -60,6 +60,11 @@ inline WrappingInt32 operator+(WrappingInt32 a, uint32_t b) { return WrappingInt
 
 //! \brief The point `b` steps before `a`.
 inline WrappingInt32 operator-(WrappingInt32 a, uint32_t b) { return a + -b; }
+
+inline bool operator>(WrappingInt32 a, WrappingInt32 b) { return a.raw_value()>b.raw_value(); }
+
+inline bool operator<(WrappingInt32 a, WrappingInt32 b) { return a.raw_value()<b.raw_value(); }
 //!@}
+inline int32_t operator+(WrappingInt32 a, WrappingInt32 b) { return a.raw_value() + b.raw_value(); }
 
 #endif  // SPONGE_LIBSPONGE_WRAPPING_INTEGERS_HH
