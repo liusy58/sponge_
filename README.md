@@ -398,3 +398,155 @@ index a14c1e2..9881755 100644
      //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
      //! \note This capacity limits both the bytes that have been reassembled,
 ```
+
+
+## Lab2
+
+```diff
+diff --git a/libsponge/stream_reassembler.hh b/libsponge/stream_reassembler.hh
+index 9881755..d6f43e4 100644
+--- a/libsponge/stream_reassembler.hh
++++ b/libsponge/stream_reassembler.hh
+@@ -61,6 +61,14 @@ class StreamReassembler {
+     //! \brief Is the internal state empty (other than the output stream)?
+     //! \returns `true` if no substrings are waiting to be assembled
+     bool empty() const;
++
++    uint64_t first_unread()const{
++      return _first_unread;
++    }
++    size_t window_size()const{
++      return _output.remaining_capacity();
++    }
+ };
+ 
++
+ #endif  // SPONGE_LIBSPONGE_STREAM_REASSEMBLER_HH
+diff --git a/libsponge/tcp_receiver.cc b/libsponge/tcp_receiver.cc
+index 4f0ee81..f7ca65d 100644
+--- a/libsponge/tcp_receiver.cc
++++ b/libsponge/tcp_receiver.cc
+@@ -11,9 +11,45 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
+ using namespace std;
+ 
+ void TCPReceiver::segment_received(const TCPSegment &seg) {
+-    DUMMY_CODE(seg);
++    auto header = seg.header();
++    auto playload = seg.payload();
++    uint64_t index = 0;
++    if(header.syn){
++        _isn_recv = true;
++        _isn = header.seqno;
++    }else{
++        index = unwrap(header.seqno,_isn,_reassembler.first_unread()+1)-1;
++    }
++    if(!_isn_recv){
++        return;
++    }
++    if(header.fin){
++        _fin_rev=true;
++    }
++    _reassembler.push_substring(playload.copy(),index,header.fin);
+ }
+ 
+-optional<WrappingInt32> TCPReceiver::ackno() const { return {}; }
+ 
+-size_t TCPReceiver::window_size() const { return {}; }
++//! This is the beginning of the receiver's window, or in other words, the sequence number
++//! of the first byte in the stream that the receiver hasn't received.
++optional<WrappingInt32> TCPReceiver::ackno() const { 
++    if(!_isn_recv){
++        return {};
++    }
++    WrappingInt32 res( _isn + _reassembler.first_unread() + _isn_recv + (_reassembler.empty()&&_fin_rev));
++    return res;
++ }
++
++//! \brief The window size that should be sent to the peer
++//!
++//! Operationally: the capacity minus the number of bytes that the
++//! TCPReceiver is holding in its byte stream (those that have been
++//! reassembled, but not consumed).
++//!
++//! Formally: the difference between (a) the sequence number of
++//! the first byte that falls after the window (and will not be
++//! accepted by the receiver) and (b) the sequence number of the
++//! beginning of the window (the ackno).
++size_t TCPReceiver::window_size() const { 
++    return _reassembler.window_size();
++ }
+diff --git a/libsponge/tcp_receiver.hh b/libsponge/tcp_receiver.hh
+index 0856a3f..736a633 100644
+--- a/libsponge/tcp_receiver.hh
++++ b/libsponge/tcp_receiver.hh
+@@ -19,7 +19,11 @@ class TCPReceiver {
+ 
+     //! The maximum number of bytes we'll store.
+     size_t _capacity;
+-
++    bool _isn_recv{false};
++    WrappingInt32 _isn{0};
++    uint64_t _abseq{0};
++    uint64_t _checkpoint{0};
++    bool _fin_rev{false};
+   public:
+     //! \brief Construct a TCP receiver
+     //!
+diff --git a/libsponge/wrapping_integers.cc b/libsponge/wrapping_integers.cc
+index 7176532..d0cbd9a 100644
+--- a/libsponge/wrapping_integers.cc
++++ b/libsponge/wrapping_integers.cc
+@@ -14,8 +14,7 @@ using namespace std;
+ //! \param n The input absolute 64-bit sequence number
+ //! \param isn The initial sequence number
+ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
+-    DUMMY_CODE(n, isn);
+-    return WrappingInt32{0};
++    return isn+n;
+ }
+ 
+ //! Transform a WrappingInt32 into an "absolute" 64-bit sequence number (zero-indexed)
+@@ -29,6 +28,23 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
+ //! and the other stream runs from the remote TCPSender to the local TCPReceiver and
+ //! has a different ISN.
+ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
+-    DUMMY_CODE(n, isn, checkpoint);
+-    return {};
++    WrappingInt32 check=wrap(checkpoint,isn);
++
++    //   -------check-----------------n---------
++    if(check<n){
++        uint32_t diff1= n-check;
++        uint32_t diff2 = (1ul << 32) - diff1;
++        if(diff1<diff2||checkpoint<diff2){
++            return checkpoint + diff1;
++        }
++        return checkpoint - diff2;
++    }
++
++    //   -------n-----------------check---------
++    uint32_t diff1 = check -n;
++    uint32_t diff2 = (1ul << 32) - diff1;
++    if(diff2<diff1||checkpoint<diff1){
++        return checkpoint + diff2;
++    }
++    return checkpoint - diff1;
+ }
+diff --git a/libsponge/wrapping_integers.hh b/libsponge/wrapping_integers.hh
+index 211a4e1..ce3b456 100644
+--- a/libsponge/wrapping_integers.hh
++++ b/libsponge/wrapping_integers.hh
+@@ -60,6 +60,11 @@ inline WrappingInt32 operator+(WrappingInt32 a, uint32_t b) { return WrappingInt
+ 
+ //! \brief The point `b` steps before `a`.
+ inline WrappingInt32 operator-(WrappingInt32 a, uint32_t b) { return a + -b; }
++
++inline bool operator>(WrappingInt32 a, WrappingInt32 b) { return a.raw_value()>b.raw_value(); }
++
++inline bool operator<(WrappingInt32 a, WrappingInt32 b) { return a.raw_value()<b.raw_value(); }
+ //!@}
++inline int32_t operator+(WrappingInt32 a, WrappingInt32 b) { return a.raw_value() + b.raw_value(); }
+ 
+ #endif  // SPONGE_LIBSPONGE_WRAPPING_INTEGERS_HH
+
+```
