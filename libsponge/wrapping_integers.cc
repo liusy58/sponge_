@@ -39,6 +39,8 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
         }
         return checkpoint - diff2;
     }
+
+    //   -------n-----------------check---------
     uint32_t diff1 = check -n;
     uint32_t diff2 = (1ul << 32) - diff1;
     if(diff2<diff1||checkpoint<diff1){
