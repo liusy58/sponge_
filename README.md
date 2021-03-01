@@ -550,3 +550,275 @@ index 211a4e1..ce3b456 100644
  #endif  // SPONGE_LIBSPONGE_WRAPPING_INTEGERS_HH
 
 ```
+
+
+## Lab3
+
+```diff
+diff --git a/libsponge/tcp_sender.cc b/libsponge/tcp_sender.cc
+index 30ca8e4..5943a48 100644
+--- a/libsponge/tcp_sender.cc
++++ b/libsponge/tcp_sender.cc
+@@ -3,7 +3,7 @@
+ #include "tcp_config.hh"
+ 
+ #include <random>
+-
++#include <algorithm>
+ // Dummy implementation of a TCP sender
+ 
+ // For Lab 3, please replace with a real implementation that passes the
+@@ -20,19 +20,147 @@ using namespace std;
+ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const std::optional<WrappingInt32> fixed_isn)
+     : _isn(fixed_isn.value_or(WrappingInt32{random_device()()}))
+     , _initial_retransmission_timeout{retx_timeout}
+-    , _stream(capacity) {}
++    , _stream(capacity)
++    , _timer(retx_timeout){}
+ 
+-uint64_t TCPSender::bytes_in_flight() const { return {}; }
++uint64_t TCPSender::bytes_in_flight() const { 
++    return _bytes_in_flight;
++ }
+ 
+-void TCPSender::fill_window() {}
++void TCPSender::fill_window() {
++    if(!_is_syn){
++        send_empty_segment();
++        return;
++    }
++    while(_win>0&&!_stream.buffer_empty()){
++        TCPSegment seg;
++        auto&header = seg.header();
++        auto&payload = seg.payload();
++        auto len = min(min(_win,_stream.buffer_size()),TCPConfig::MAX_PAYLOAD_SIZE);
++        string str = _stream.peek_output(len);
++        _stream.pop_output(len);
++        payload = Buffer(static_cast<string &&>(str));
++        header.seqno = next_seqno();
++//        if(_stream.buffer_empty()){
++//            header.fin = 1;
++//        }
++//        if(!_stream.bytes_read()){
++//            header.syn = 1;
++//        }
++        if(!_is_fin&&_stream.buffer_empty()&&_stream.input_ended()&&_win>len){
++            header.fin = 1;
++            _is_fin = 1 ;
++        }
++        _segment_in_flight.push_back(Data(_next_seqno,seg));
++        _segments_out.push(seg);
++        _next_seqno += seg.length_in_sequence_space();
++        _win -= seg.length_in_sequence_space();
++        _bytes_in_flight += seg.length_in_sequence_space();
++        _timer.start_if_not();
++    }
++    if(_win>_bytes_in_flight&&!_is_fin&&_stream.buffer_empty()&&_stream.input_ended()){
++        send_empty_with_flags(true,false);
++    }
++}
+ 
+ //! \param ackno The remote receiver's ackno (acknowledgment number)
+ //! \param window_size The remote receiver's advertised window size
+-void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) { DUMMY_CODE(ackno, window_size); }
++void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
++    if(!window_size){
++        _win=1;
++        _win_zero=1;
++    }
++    else{
++        if(window_size>_bytes_in_flight){
++            _win_zero=0;
++        }
++        _win = window_size;
++    }
++    update_seg_flight(ackno);
++    if(!_is_fin&&_stream.buffer_empty()&&_stream.input_ended()&&_win>_bytes_in_flight){
++        _is_fin=1;
++        send_empty_with_flags(true,false);
++    }
++ }
+ 
+ //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
+-void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
++void TCPSender::tick(const size_t ms_since_last_tick) { 
++    _timer.add_time(ms_since_last_tick);
++    if(_timer.is_expired()&&!_win_zero){
++        retransmit();
++        _timer.double_RTO();
++        _timer.reset();
++    }else if(_timer.is_expired()&&_win_zero){
++        retransmit();
++        _timer.reset();
++    }
++ }
++
++ //! \brief Number of consecutive retransmissions that have occurred in a row
++
++unsigned int TCPSender::consecutive_retransmissions() const {
++    return _consecutive_retranmission;
++ }
++
++//! \brief Generate an empty-payload segment (useful for creating empty ACK segments)
++void TCPSender::send_empty_segment() {
++    TCPSegment seg;
++    auto&header = seg.header();
++    if(!_is_syn){
++        header.syn = 1;
++        _is_syn = 1;
++    }
++    header.seqno = wrap(_next_seqno,_isn);
++    _segment_in_flight.push_back(Data(_next_seqno,seg));
++    _next_seqno += seg.length_in_sequence_space();
++    _bytes_in_flight += seg.length_in_sequence_space();
++    _segments_out.push(seg);
++    _timer.start_if_not();
++}
++
++void TCPSender::update_seg_flight(const WrappingInt32 ackno){
++
++    auto ackno_unwrap = unwrap(ackno,_isn,_first_seqno_in_flight);
++    if(!_bytes_in_flight){
++        return;
++    }
++    for(auto iter=_segment_in_flight.begin();iter!=_segment_in_flight.end();){ 
++        if(iter->_is_received(ackno_unwrap)){
++            _first_seqno_in_flight = min(_first_seqno_in_flight,iter->get_seqno());
++            _bytes_in_flight -= iter->get_segment().length_in_sequence_space();
++            iter= _segment_in_flight.erase(iter);
++            _consecutive_retranmission = 0;
++            _timer.reset_RTO();
++            _timer.reset();
++
++        }else{
++            iter++;
++        }
++    }
++}
++
+ 
+-unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
++void TCPSender::retransmit(){
++    if(_consecutive_retranmission>TCPConfig::MAX_RETX_ATTEMPTS){
++        return;
++    }
++    if(_segment_in_flight.empty()){
++        return;
++    }
++    auto seg = _segment_in_flight[0].get_segment();
++    _segments_out.push(seg);
++    _consecutive_retranmission += 1;
++}
+ 
+-void TCPSender::send_empty_segment() {}
++void TCPSender::send_empty_with_flags(bool fin, bool syn){
++    _is_fin=1;
++    TCPSegment seg;
++    seg.header().fin = fin;
++    seg.header().syn = syn;
++    seg.header().seqno =  wrap(_next_seqno,_isn);
++    seg.payload()=string("");
++    _segment_in_flight.push_back(Data(_next_seqno,seg));
++    _next_seqno += seg.length_in_sequence_space();
++    _bytes_in_flight += seg.length_in_sequence_space();
++    _segments_out.push(seg);
++}
+\ No newline at end of file
+diff --git a/libsponge/tcp_sender.hh b/libsponge/tcp_sender.hh
+index ed0c4fb..63f77d7 100644
+--- a/libsponge/tcp_sender.hh
++++ b/libsponge/tcp_sender.hh
+@@ -16,7 +16,64 @@
+ //! maintains the Retransmission Timer, and retransmits in-flight
+ //! segments if the retransmission timer expires.
+ class TCPSender {
++  enum STATE{CLOSED = 0,SYN_SENT,SYN_ACKED,FIN_SENT,FIN_ACKED};
+   private:
++    class Data{
++      private: 
++        uint64_t absolute_seqno;
++        TCPSegment seg;
++
++      public:
++        Data(uint64_t _absolute_seqno,TCPSegment _seg):
++        absolute_seqno(_absolute_seqno),seg(_seg){}
++
++        bool _is_received(uint64_t seqno){
++          return ((absolute_seqno+seg.length_in_sequence_space())<=seqno);
++        }
++        uint64_t get_seqno(){
++          return absolute_seqno;
++        }
++        TCPSegment get_segment(){
++          return seg;
++        }
++    };
++    class Timer{
++      private:
++        bool start{false};
++        size_t time_elasped{0};
++        unsigned int initial_retransmission_timeout;
++        unsigned int retransmission_timeout;
++      public:
++        Timer(int retx_timeout):
++        initial_retransmission_timeout(retx_timeout)
++        , retransmission_timeout(retx_timeout){}
++        void add_time(const size_t ms_since_last_tick){
++          time_elasped += ms_since_last_tick;
++        }
++        bool is_expired(){
++          return time_elasped >= retransmission_timeout;
++        }
++        void double_RTO(){
++          retransmission_timeout*=2;
++        }
++        void reset_RTO(){
++          retransmission_timeout = initial_retransmission_timeout;
++        }
++        void reset(){
++          time_elasped = 0;
++        }
++        void start_if_not(){
++            if(start){
++                return;
++            }
++          start = true;
++          time_elasped = 0;
++          retransmission_timeout = initial_retransmission_timeout;
++        }
++        bool is_start(){
++          return start;
++        }
++    };
+     //! our initial sequence number, the number for our SYN.
+     WrappingInt32 _isn;
+ 
+@@ -26,12 +83,25 @@ class TCPSender {
+     //! retransmission timer for the connection
+     unsigned int _initial_retransmission_timeout;
+ 
++
+     //! outgoing stream of bytes that have not yet been sent
+     ByteStream _stream;
+ 
++    Timer _timer;
++    std::vector<Data> _segment_in_flight{};
+     //! the (absolute) sequence number for the next byte to be sent
+     uint64_t _next_seqno{0};
+-
++    bool _is_syn{false};
++    bool _is_fin{false};
++    size_t _win{0};
++    uint64_t _first_seqno_in_flight{0};
++    uint64_t _bytes_in_flight{0};
++    unsigned int _consecutive_retranmission{0};
++    bool _win_zero{false};
++    void update_seg_flight(const WrappingInt32 ackno);
++    void retransmit();
++
++    void send_empty_with_flags(bool fin, bool syn);
+   public:
+     //! Initialize a TCPSender
+     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
+
+```
