@@ -822,3 +822,392 @@ index ed0c4fb..63f77d7 100644
      TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
 
 ```
+
+## lab3 (v2)
+
+```diff
+diff --git a/libsponge/tcp_sender.cc b/libsponge/tcp_sender.cc
+index 30ca8e4..4bec3f7 100644
+--- a/libsponge/tcp_sender.cc
++++ b/libsponge/tcp_sender.cc
+@@ -20,19 +20,232 @@ using namespace std;
+ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const std::optional<WrappingInt32> fixed_isn)
+     : _isn(fixed_isn.value_or(WrappingInt32{random_device()()}))
+     , _initial_retransmission_timeout{retx_timeout}
+-    , _stream(capacity) {}
++    , _stream(capacity)
++    ,_timer(retx_timeout){}
+ 
+-uint64_t TCPSender::bytes_in_flight() const { return {}; }
++uint64_t TCPSender::bytes_in_flight() const {
++    return _bytes_in_flight;
++}
+ 
+-void TCPSender::fill_window() {}
++void TCPSender::fill_window() {
++    if(_status == TCPSenderState::FIN_ACKED){
++        return;
++    }
++    if(_status == TCPSenderState::CLOSED){
++        send_empty_segment();
++        return;
++    }
++    if(_send_zero_win&&!_rev_win&&!_zero_win_handled){
++        if(_stream.eof()){
++            send_fin_segment();
++            return;
++        }
++        handle_zero_win();
++        return;
++    }
++    while(_rev_win>0&&!_stream.buffer_empty()){
++        auto len = min(_rev_win,TCPConfig::MAX_PAYLOAD_SIZE);
++        auto str = _stream.read(len);
++        len = str.size();
++        TCPSegment seg;
++        TCPHeader &header = seg.header();
++        seg.payload() = Buffer(std::move(str));
++        header.seqno = next_seqno();
++        if(_rev_win>len&&_stream.eof()){
++            header.fin = true;
++            set_status(FIN_SENT);
++        }
++        header.seqno = next_seqno();
++        _segment_in_flight.emplace_back(_next_seqno,seg);
++        _segments_out.push(seg);
++        _bytes_in_flight += seg.length_in_sequence_space();
++        _rev_win -= seg.length_in_sequence_space();
++        _next_seqno += seg.length_in_sequence_space();
++
++        _timer.start_if_not();
++    }
++    check_fin();
++}
+ 
+ //! \param ackno The remote receiver's ackno (acknowledgment number)
+ //! \param window_size The remote receiver's advertised window size
+-void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) { DUMMY_CODE(ackno, window_size); }
++void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
++
++    _rev_win = window_size;
++    _send_zero_win = (window_size ==0);
++    _zero_win_handled = false;
++    update_flights_in_flight(ackno);
++    //When all outstanding data has been acknowledged, stop the retransmission timer.
++//    if(!_bytes_in_flight){
++//        _timer.close();
++//    }
++}
+ 
+ //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
+-void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
++void TCPSender::tick(const size_t ms_since_last_tick) {
++    if(!_timer.is_start()){
++        return;
++    }
++    _timer.add_time(ms_since_last_tick);
++
++    if(_timer.is_expired()){
++        retransmit();
++        if(!_send_zero_win)
++            _timer.double_rto();
++        _timer.timer_restart();
++    }
++
++}
++
++unsigned int TCPSender::consecutive_retransmissions() const {
++    return _consecutive_retransmissions;
++}
++
++
++void TCPSender::send_empty_segment() {
++    TCPSegment seg;
++    seg.header().seqno = wrap(0,_isn);
++    seg.header().syn = true;
++    _bytes_in_flight = 1;
++    _next_seqno = 1;
++    _segments_out.push(seg);
++    set_status(SYN_SENT);
++    _timer.start_if_not();
++}
++
++// get the receiver's current status
++void TCPSender::set_status(TCPSenderState status) {
++//    if(_stream.error()){
++//        _status = TCPSenderState::ERROR;
++//    }else if(_next_seqno == 0){
++//        _status = TCPSenderState::CLOSED;
++//    }else if(_next_seqno == bytes_in_flight()){
++//        _status = TCPSenderState::SYN_SENT;
++//    }else if(_stream.eof()){
++//        _status = TCPSenderState::SYN_ACKED;
++//    }else if(_next_seqno < _stream.bytes_written() + 2){
++//        _status = TCPSenderState::SYN_ACKED;
++//    }else if(bytes_in_flight()){
++//        _status = TCPSenderState::FIN_SENT;
++//    }else{
++//        _status = TCPSenderState::FIN_ACKED;
++//    }
++    _status = status;
++
++}
++
++void TCPSender::retransmit() {
++    _consecutive_retransmissions += 1;
++    if(_consecutive_retransmissions > TCPConfig::MAX_RETX_ATTEMPTS){
++        return;
++    }
++    if(_status == TCPSenderState::SYN_SENT&&_bytes_in_flight==1){
++        send_empty_segment();
++        return;
++    }
++    if(_status == TCPSenderState::FIN_SENT&&_bytes_in_flight==1){
++        resend_fin_segment();
++        return;
++    }
++
++    if(_segment_in_flight.empty()){
++        return;
++    }
++    /*
++    * Retransmit the earliest (lowest sequence number) segment that hasn’t been fully
++    acknowledged by the TCP receiver.
++    */
++    auto seg = _segment_in_flight.front().get_seg();
++    _segments_out.push(seg);
++    /*    if the timer is not running, start it running
++     *    so that it will expire after RTO milliseconds
++     */
++    _timer.start_if_not();
++}
++
++void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
++    uint64_t seq_no = unwrap(ackno,_isn,_next_seqno);
++    if(_status == TCPSenderState::SYN_SENT){
++        // handle wrong ackno
++        if(seq_no >= 1){
++            set_status(SYN_ACKED);
++            _last_rev_seqno = seq_no;
++            _bytes_in_flight-=1;
++        }
++    }else if(seq_no>_last_rev_seqno){
++        _last_rev_seqno = seq_no;
++        _timer._reset_rto();
++        if(_bytes_in_flight){
++            _timer.timer_restart();
++        }
++        reset_consecutive_retransmission();
++    }
++    for(auto iter = _segment_in_flight.begin();iter!=_segment_in_flight.end();){
++        auto _seq_no = iter->get_seq_no();
++        auto _seg = iter->get_seg();
++        if(_seq_no+_seg.length_in_sequence_space()<=seq_no){
++            _bytes_in_flight -= _seg.length_in_sequence_space();
++            iter = _segment_in_flight.erase(iter);
++        }else{
++            iter++;
++        }
++    }
++    if(seq_no == _next_seqno&&_status == FIN_SENT&&_bytes_in_flight==1){
++        _bytes_in_flight -=1;
++        set_status(FIN_ACKED);
++    }
++
++}
++
++void TCPSender::handle_zero_win(){
++    size_t len = 1;
++    string str = _stream.read(len);
++    TCPSegment seg;
++    Buffer payload{static_cast<string &&>(str)};
++    seg.payload() = payload;
++    seg.header().seqno = next_seqno();
++    _segment_in_flight.emplace_back(_next_seqno,seg);
++    _segments_out.push(seg);
++    _bytes_in_flight += 1;
++    _next_seqno += 1;
++    _timer.start_if_not();
++    _zero_win_handled=true;
++}
+ 
+-unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
++void TCPSender::check_fin(){
++    if(!_rev_win||_rev_win<_bytes_in_flight){
++        return;
++    }
++    if(_status==TCPSenderState::SYN_ACKED&&_stream.eof()){
++        TCPSegment seg;
++        seg.header().fin = true;
++        seg.header().seqno = next_seqno();
++        set_status(FIN_SENT);
++        _fin_seq = Fin_seq(true,_next_seqno);
++        _bytes_in_flight += seg.length_in_sequence_space();
++        _next_seqno += seg.length_in_sequence_space();
++        _segments_out.push(seg);
++        set_status(FIN_SENT);
++        _timer.start_if_not();
++    }
++}
++void TCPSender::resend_fin_segment() {
++    TCPSegment seg;
++    seg.header().fin = true;
++    seg.header().seqno = wrap(_fin_seq._seq_no,_isn);
++    set_status(FIN_SENT);
++    _segments_out.push(seg);
++    _timer.start_if_not();
++}
+ 
+-void TCPSender::send_empty_segment() {}
++void TCPSender::send_fin_segment() {
++    TCPSegment seg;
++    seg.header().fin = true;
++    seg.header().seqno = next_seqno();
++    _fin_seq = Fin_seq(true,_next_seqno);
++    set_status(FIN_SENT);
++    _segments_out.push(seg);
++    _bytes_in_flight += seg.length_in_sequence_space();
++    _next_seqno += seg.length_in_sequence_space();
++    _timer.start_if_not();
++}
+\ No newline at end of file
+diff --git a/libsponge/tcp_sender.hh b/libsponge/tcp_sender.hh
+index ed0c4fb..ea0a865 100644
+--- a/libsponge/tcp_sender.hh
++++ b/libsponge/tcp_sender.hh
+@@ -8,6 +8,7 @@
+ 
+ #include <functional>
+ #include <queue>
++#include <utility>
+ 
+ //! \brief The "sender" part of a TCP implementation.
+ 
+@@ -17,6 +18,78 @@
+ //! segments if the retransmission timer expires.
+ class TCPSender {
+   private:
++    class Fin_seq{
++      public:
++        bool _is_valid;
++        uint64_t _seq_no;
++        Fin_seq(bool is_valid,uint64_t seq):_is_valid(is_valid),_seq_no(seq){}
++    };
++
++    class Timer{
++      private:
++        unsigned int _initial_retransmission_timeout;
++        unsigned int _current_retransmission_timeout;
++        unsigned int _time_elapsed;
++        bool _start{false};
++        bool _can_double{true};
++      public:
++        Timer(unsigned int retx_timeout):
++            _initial_retransmission_timeout(retx_timeout),
++            _current_retransmission_timeout(retx_timeout),
++            _time_elapsed(0){}
++        void start(){
++            _start = true;
++        }
++        bool is_start(){
++            return _start;
++        }
++        bool is_expired(){
++            return _time_elapsed >= _current_retransmission_timeout;
++        }
++        void timer_restart(){
++            _time_elapsed = 0;
++        }
++        void _reset_rto(){
++            _current_retransmission_timeout = _initial_retransmission_timeout;
++        }
++        void close(){
++            _start = false;
++        }
++        void add_time(unsigned int _ticks){
++            _time_elapsed += _ticks;
++        }
++        void start_if_not(){
++            if(_start){
++                return;
++            }
++            _start = true;
++            _time_elapsed = 0;
++        }
++        void double_rto(){
++            if(!_can_double){
++                return;
++            }
++            _current_retransmission_timeout*=2;
++        }
++        void set_can_double(bool is){
++            _can_double = is;
++        }
++    };
++
++    class Data{
++        uint64_t _seq_no;
++        TCPSegment _seg;
++
++      public:
++        Data(uint64_t seq_no,TCPSegment seg):_seq_no(seq_no),_seg(seg){};
++        TCPSegment get_seg(){
++            return _seg;
++        }
++
++        uint64_t get_seq_no(){
++            return _seq_no;
++        }
++    };
+     //! our initial sequence number, the number for our SYN.
+     WrappingInt32 _isn;
+ 
+@@ -29,9 +102,37 @@ class TCPSender {
+     //! outgoing stream of bytes that have not yet been sent
+     ByteStream _stream;
+ 
++    Timer _timer;
++    size_t _rev_win{0};
++    std::deque<Data> _segment_in_flight{};
+     //! the (absolute) sequence number for the next byte to be sent
+-    uint64_t _next_seqno{0};
+-
++    uint64_t _next_seqno{0}; //
++    uint64_t _last_rev_seqno{static_cast<uint64_t>(-1)};
++    uint64_t _bytes_in_flight{0}; //
++    unsigned int _consecutive_retransmissions{0};// the counter of consecutive retransmmision
++    bool _send_zero_win{false};
++    bool _zero_win_handled{false};
++    Fin_seq _fin_seq{false,0};
++    enum TCPSenderState{
++        ERROR = 0,
++        CLOSED = 1,
++        SYN_SENT = 2,
++        SYN_ACKED = 3,
++        FIN_SENT = 4,
++        FIN_ACKED = 5
++    };
++    TCPSenderState _status{TCPSenderState::CLOSED};
++    void set_status(TCPSenderState status);
++    void reset_consecutive_retransmission(){
++        _consecutive_retransmissions = 0;
++    }
++
++    void update_flights_in_flight(const WrappingInt32 ackno);
++
++    void handle_zero_win();
++    void check_fin();
++    void resend_fin_segment();
++    void send_fin_segment();
+   public:
+     //! Initialize a TCPSender
+     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
+@@ -87,6 +188,8 @@ class TCPSender {
+     //! \brief relative seqno for the next byte to be sent
+     WrappingInt32 next_seqno() const { return wrap(_next_seqno, _isn); }
+     //!@}
++
++    void retransmit();
+ };
+ 
+```
