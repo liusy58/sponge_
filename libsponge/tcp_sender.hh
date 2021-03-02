@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <queue>
+#include <utility>
 
 //! \brief The "sender" part of a TCP implementation.
 
@@ -17,6 +18,64 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
+    class Timer{
+      private:
+        unsigned int _initial_retransmission_timeout;
+        unsigned int _current_retransmission_timeout;
+        unsigned int _time_elapsed;
+        bool _start{false};
+      public:
+        Timer(unsigned int retx_timeout):
+            _initial_retransmission_timeout(retx_timeout),
+            _current_retransmission_timeout(retx_timeout),
+            _time_elapsed(0){}
+        void start(){
+            _start = true;
+        }
+        bool is_start(){
+            return _start;
+        }
+        bool is_expired(){
+            return _time_elapsed >= _current_retransmission_timeout;
+        }
+        void timer_restart(){
+            _time_elapsed = 0;
+        }
+        void _reset_rto(){
+            _current_retransmission_timeout = _initial_retransmission_timeout;
+        }
+        void close(){
+            _start = false;
+        }
+        void add_time(unsigned int _ticks){
+            _time_elapsed += _ticks;
+        }
+        void start_if_not(){
+            if(_start){
+                return;
+            }
+            _start = true;
+            _time_elapsed = 0;
+        }
+        void double_rto(){
+            _current_retransmission_timeout*=2;
+        }
+    };
+
+    class Data{
+        uint64_t _seq_no;
+        TCPSegment _seg;
+
+      public:
+        Data(uint64_t seq_no,TCPSegment seg):_seq_no(seq_no),_seg(seg){};
+        TCPSegment get_seg(){
+            return _seg;
+        }
+
+        uint64_t get_seq_no(){
+            return _seq_no;
+        }
+    };
     //! our initial sequence number, the number for our SYN.
     WrappingInt32 _isn;
 
@@ -29,9 +88,35 @@ class TCPSender {
     //! outgoing stream of bytes that have not yet been sent
     ByteStream _stream;
 
+    Timer _timer;
+    size_t _rev_win{0};
+    std::deque<Data> _segment_in_flight{};
     //! the (absolute) sequence number for the next byte to be sent
-    uint64_t _next_seqno{0};
+    uint64_t _next_seqno{0}; //
+    uint64_t _last_rev_seqno{static_cast<uint64_t>(-1)};
+    uint64_t _bytes_in_flight{0}; //
+    unsigned int _consecutive_retransmissions{0};// the counter of consecutive retransmmision
+    bool _send_zero_win{false};
 
+    enum TCPSenderState{
+        ERROR = 0,
+        CLOSED = 1,
+        SYN_SENT = 2,
+        SYN_ACKED = 3,
+        FIN_SENT = 4,
+        FIN_ACKED = 5
+    };
+    TCPSenderState _status{TCPSenderState::CLOSED};
+    void set_status(TCPSenderState status);
+    void reset_consecutive_retransmission(){
+        _consecutive_retransmissions = 0;
+    }
+
+    void update_flights_in_flight(const WrappingInt32 ackno);
+
+    void handle_zero_win();
+    void check_fin();
+    void send_fin_segment();
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
@@ -87,6 +172,8 @@ class TCPSender {
     //! \brief relative seqno for the next byte to be sent
     WrappingInt32 next_seqno() const { return wrap(_next_seqno, _isn); }
     //!@}
+
+    void retransmit();
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_SENDER_HH

@@ -88,6 +88,10 @@ class ByteStream {
     //! Total number of bytes popped
     size_t bytes_read() const;
     //!@}
+
+    bool error(){
+        return _error;
+    }
     
 };
 
