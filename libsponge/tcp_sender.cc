@@ -37,7 +37,7 @@ void TCPSender::fill_window() {
     }
     if(_send_zero_win&&!_rev_win&&!_zero_win_handled){
         if(_stream.eof()){
-            send_fin_segment(false);
+            send_fin_segment();
             return;
         }
         handle_zero_win();
@@ -144,7 +144,7 @@ void TCPSender::retransmit() {
         return;
     }
     if(_status == TCPSenderState::FIN_SENT&&_bytes_in_flight==1){
-        send_fin_segment(true);
+        resend_fin_segment();
         return;
     }
 
@@ -221,6 +221,7 @@ void TCPSender::check_fin(){
         seg.header().fin = true;
         seg.header().seqno = next_seqno();
         set_status(FIN_SENT);
+        _fin_seq = Fin_seq(true,_next_seqno);
         _bytes_in_flight += seg.length_in_sequence_space();
         _next_seqno += seg.length_in_sequence_space();
         _segments_out.push(seg);
@@ -228,12 +229,23 @@ void TCPSender::check_fin(){
         _timer.start_if_not();
     }
 }
-void TCPSender::send_fin_segment(bool back) {
+void TCPSender::resend_fin_segment() {
     TCPSegment seg;
     seg.header().fin = true;
-    seg.header().seqno = next_seqno()-back;
+    seg.header().seqno = wrap(_fin_seq._seq_no,_isn);
     set_status(FIN_SENT);
     _segments_out.push(seg);
+    _timer.start_if_not();
+}
+
+void TCPSender::send_fin_segment() {
+    TCPSegment seg;
+    seg.header().fin = true;
+    seg.header().seqno = next_seqno();
+    _fin_seq = Fin_seq(true,_next_seqno);
     set_status(FIN_SENT);
+    _segments_out.push(seg);
+    _bytes_in_flight += seg.length_in_sequence_space();
+    _next_seqno += seg.length_in_sequence_space();
     _timer.start_if_not();
 }

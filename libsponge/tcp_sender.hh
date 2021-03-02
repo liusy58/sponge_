@@ -18,6 +18,13 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
+    class Fin_seq{
+      public:
+        bool _is_valid;
+        uint64_t _seq_no;
+        Fin_seq(bool is_valid,uint64_t seq):_is_valid(is_valid),_seq_no(seq){}
+    };
+
     class Timer{
       private:
         unsigned int _initial_retransmission_timeout;
@@ -105,7 +112,7 @@ class TCPSender {
     unsigned int _consecutive_retransmissions{0};// the counter of consecutive retransmmision
     bool _send_zero_win{false};
     bool _zero_win_handled{false};
-
+    Fin_seq _fin_seq{false,0};
     enum TCPSenderState{
         ERROR = 0,
         CLOSED = 1,
@@ -124,7 +131,8 @@ class TCPSender {
 
     void handle_zero_win();
     void check_fin();
-    void send_fin_segment(bool back);
+    void resend_fin_segment();
+    void send_fin_segment();
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
