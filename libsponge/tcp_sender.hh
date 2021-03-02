@@ -24,6 +24,7 @@ class TCPSender {
         unsigned int _current_retransmission_timeout;
         unsigned int _time_elapsed;
         bool _start{false};
+        bool _can_double{true};
       public:
         Timer(unsigned int retx_timeout):
             _initial_retransmission_timeout(retx_timeout),
@@ -58,7 +59,13 @@ class TCPSender {
             _time_elapsed = 0;
         }
         void double_rto(){
+            if(!_can_double){
+                return;
+            }
             _current_retransmission_timeout*=2;
+        }
+        void set_can_double(bool is){
+            _can_double = is;
         }
     };
 
@@ -97,6 +104,7 @@ class TCPSender {
     uint64_t _bytes_in_flight{0}; //
     unsigned int _consecutive_retransmissions{0};// the counter of consecutive retransmmision
     bool _send_zero_win{false};
+    bool _zero_win_handled{false};
 
     enum TCPSenderState{
         ERROR = 0,
@@ -116,7 +124,7 @@ class TCPSender {
 
     void handle_zero_win();
     void check_fin();
-    void send_fin_segment();
+    void send_fin_segment(bool back);
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
