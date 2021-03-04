@@ -6,9 +6,24 @@
 #include "tcp_sender.hh"
 #include "tcp_state.hh"
 
+#include <vector>
 //! \brief A complete endpoint of a TCP connection
 class TCPConnection {
   private:
+    enum class State {
+        LISTEN = 0,   //!< Listening for a peer to connect
+        SYN_RCVD,     //!< Got the peer's SYN
+        SYN_SENT,     //!< Sent a SYN to initiate a connection
+        ESTABLISHED,  //!< Three-way handshake complete
+        CLOSE_WAIT,   //!< Remote side has sent a FIN, connection is half-open
+        LAST_ACK,     //!< Local side sent a FIN from CLOSE_WAIT, waiting for ACK
+        FIN_WAIT_1,   //!< Sent a FIN to the remote side, not yet ACK'd
+        FIN_WAIT_2,   //!< Received an ACK for previously-sent FIN
+        CLOSING,      //!< Received a FIN just after we sent one
+        TIME_WAIT,    //!< Both sides have sent FIN and ACK'd, waiting for 2 MSL
+        CLOSED,       //!< A connection that has terminated normally
+        RESET,        //!< A connection that terminated abnormally
+    };
     TCPConfig _cfg;
     TCPReceiver _receiver{_cfg.recv_capacity};
     TCPSender _sender{_cfg.send_capacity, _cfg.rt_timeout, _cfg.fixed_isn};
@@ -20,7 +35,13 @@ class TCPConnection {
     //! for 10 * _cfg.rt_timeout milliseconds after both streams have ended,
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
-
+    size_t _time_since_last_segment_received{0};
+    State _state{State::CLOSED};
+    bool _remote_first_end{false};
+    void handle_rst_rev();
+    void set_state(State state){_state = state;}
+    void fill_window(bool create_empty);
+    void set_linger_after_streams_finish();
   public:
     //! \name "Input" interface for the writer
     //!@{
@@ -44,6 +65,9 @@ class TCPConnection {
 
     //! \brief The inbound byte stream received from the peer
     ByteStream &inbound_stream() { return _receiver.stream_out(); }
+    ByteStream inbound_stream()const { return _receiver.stream_out(); }
+    ByteStream &outbound_stream() { return _sender.stream_in(); }
+    ByteStream outbound_stream()const { return _sender.stream_in(); }
     //!@}
 
     //! \name Accessors used for testing
@@ -94,6 +118,13 @@ class TCPConnection {
     TCPConnection(const TCPConnection &other) = delete;
     TCPConnection &operator=(const TCPConnection &other) = delete;
     //!@}
+
+    bool is_state_valid(std::vector<State>states){
+        return std::find(states.begin(),states.end(),_state)!=states.end();
+    }
+    bool is_ack_seg(const TCPSegment&seg);
 };
+
+
 
 #endif  // SPONGE_LIBSPONGE_TCP_FACTORED_HH

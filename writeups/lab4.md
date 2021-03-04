@@ -25,3 +25,7 @@ Remaining Bugs:
 - Optional: I was surprised by: [describe]
 
 - Optional: I'm not sure about: [describe]
+
+
+if the incoming segment occupied any sequence numbers 
+that's to say, if then sender has no segment to send,

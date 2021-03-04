@@ -113,16 +113,7 @@ class TCPSender {
     bool _send_zero_win{false};
     bool _zero_win_handled{false};
     Fin_seq _fin_seq{false,0};
-    enum TCPSenderState{
-        ERROR = 0,
-        CLOSED = 1,
-        SYN_SENT = 2,
-        SYN_ACKED = 3,
-        FIN_SENT = 4,
-        FIN_ACKED = 5
-    };
-    TCPSenderState _status{TCPSenderState::CLOSED};
-    void set_status(TCPSenderState status);
+    bool _fin_send{false};
     void reset_consecutive_retransmission(){
         _consecutive_retransmissions = 0;
     }
@@ -133,7 +124,20 @@ class TCPSender {
     void check_fin();
     void resend_fin_segment();
     void send_fin_segment();
+    void retransmit();
+
+
   public:
+    enum TCPSenderState{
+        ERROR = 0,
+        CLOSED = 1,
+        SYN_SENT = 2,
+        SYN_ACKED = 3,
+        FIN_SENT = 4,
+        FIN_ACKED = 5
+    };
+    TCPSenderState _status{TCPSenderState::CLOSED};
+    void set_status(TCPSenderState status);
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
               const uint16_t retx_timeout = TCPConfig::TIMEOUT_DFLT,
@@ -188,8 +192,10 @@ class TCPSender {
     //! \brief relative seqno for the next byte to be sent
     WrappingInt32 next_seqno() const { return wrap(_next_seqno, _isn); }
     //!@}
-
-    void retransmit();
+    void send_totally_empty_seg();
+    bool is_full_acked()const{
+        return !_bytes_in_flight;
+    }
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_SENDER_HH

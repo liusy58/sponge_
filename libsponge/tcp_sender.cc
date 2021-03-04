@@ -28,9 +28,6 @@ uint64_t TCPSender::bytes_in_flight() const {
 }
 
 void TCPSender::fill_window() {
-    if(_status == TCPSenderState::FIN_ACKED){
-        return;
-    }
     if(_status == TCPSenderState::CLOSED){
         send_empty_segment();
         return;
@@ -167,7 +164,7 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
     uint64_t seq_no = unwrap(ackno,_isn,_next_seqno);
     if(_status == TCPSenderState::SYN_SENT){
         // handle wrong ackno
-        if(seq_no >= 1){
+        if(seq_no == 1){
             set_status(SYN_ACKED);
             _last_rev_seqno = seq_no;
             _bytes_in_flight-=1;
@@ -194,6 +191,9 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
         _bytes_in_flight -=1;
         set_status(FIN_ACKED);
     }
+    if(!_bytes_in_flight){
+        _timer.close();
+    }
 
 }
 
@@ -216,7 +216,7 @@ void TCPSender::check_fin(){
     if(!_rev_win||_rev_win<_bytes_in_flight){
         return;
     }
-    if(_status==TCPSenderState::SYN_ACKED&&_stream.eof()){
+    if((_status==TCPSenderState::SYN_ACKED)&&_stream.eof()){
         TCPSegment seg;
         seg.header().fin = true;
         seg.header().seqno = next_seqno();
@@ -225,7 +225,6 @@ void TCPSender::check_fin(){
         _bytes_in_flight += seg.length_in_sequence_space();
         _next_seqno += seg.length_in_sequence_space();
         _segments_out.push(seg);
-        set_status(FIN_SENT);
         _timer.start_if_not();
     }
 }
@@ -248,4 +247,10 @@ void TCPSender::send_fin_segment() {
     _bytes_in_flight += seg.length_in_sequence_space();
     _next_seqno += seg.length_in_sequence_space();
     _timer.start_if_not();
+}
+
+void TCPSender::send_totally_empty_seg(){
+    TCPSegment seg;
+    seg.header().seqno = next_seqno();
+    _segments_out.push(seg);
 }

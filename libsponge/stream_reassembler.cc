@@ -25,7 +25,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         _last_acceptable = index +data.size();
     }
     // receive data that has already assembled
-    if(data.empty()||data.size()+index-1<_first_unread){
+    if(data.empty()||data.size()+index<_first_unread+1){
         write2stream();
         return;
     }

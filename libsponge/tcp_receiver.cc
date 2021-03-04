@@ -53,3 +53,11 @@ optional<WrappingInt32> TCPReceiver::ackno() const {
 size_t TCPReceiver::window_size() const { 
     return _reassembler.window_size();
  }
+
+ bool TCPReceiver::seg_out_win(const TCPSegment&seg){
+     auto header = seg.header();
+     auto playload = seg.payload();
+     uint64_t index = 0;
+     index = unwrap(header.seqno,_isn,_reassembler.first_unread()+1)-1;
+     return _reassembler.is_out_win(index,playload.size());
+ }
