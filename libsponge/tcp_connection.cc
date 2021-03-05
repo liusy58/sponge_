@@ -11,7 +11,7 @@ template <typename... Targs>
 void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
-
+const uint16_t MAX_WINSIZE = std::numeric_limits<uint16_t>::max();
 size_t TCPConnection::remaining_outbound_capacity() const {
     return _receiver.window_size();
 }
@@ -35,7 +35,6 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     if(seg.header().rst){
         handle_rst_rev();
     }else {
-
         // if the ack flag is set, tells the TCPSender about the fields it cares about on incoming
         // segments: ackno and window size.
         if(seg.header().ack){
@@ -49,7 +48,8 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
             }
         }
         _receiver.segment_received(seg);
-        if(!is_ack_seg(seg)){
+        //ack segment out of the window---should get an ACK
+        if(!is_ack_seg(seg)&&seg.length_in_sequence_space()){
             fill_window(true);
         }
     }
@@ -59,6 +59,9 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 //! \returns `true` if either stream is still running or if the TCPConnection is lingering
 //! after both streams have finished (e.g. to ACK retransmissions from the peer)
 bool TCPConnection::active() const {
+    if(_sender.stream_in().error()&&_receiver.stream_out().error()){
+        return false;
+    }
     //The inbound stream has been fully assembled and has ended.
     bool prereq1 = inbound_stream().eof();
     bool prereq2 = (_sender._status == TCPSender::FIN_SENT || _sender._status == TCPSender::FIN_ACKED);
@@ -68,20 +71,26 @@ bool TCPConnection::active() const {
     }
     return true;
 }
-
+//! \brief Write data to the outbound byte stream, and send it over TCP if possible
+//! \returns the number of bytes from `data` that were actually written.
 size_t TCPConnection::write(const string &data) {
-    DUMMY_CODE(data);
-    return {};
+    fill_window(false);
+    size_t sz = outbound_stream().write(data);
+    fill_window(false);
+    return sz;
 }
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
     _sender.tick(ms_since_last_tick);
     _time_since_last_segment_received += ms_since_last_tick;
-    if(_time_since_last_segment_received >= _cfg.rt_timeout*10){
+    // the connection is only done after enough time (10 × cfg.rt timeout) has
+    // elapsed since the last segment was received.
+    if(_time_since_last_segment_received >= _cfg.rt_timeout*10 &&_receiver.stream_out().eof()&&_sender.stream_in().eof()){
         _linger_after_streams_finish = false;
     }
-    fill_window(false);
+    if(_sender._status!=TCPSender::CLOSED)
+        fill_window(false);
     set_linger_after_streams_finish();
 }
 
@@ -101,7 +110,7 @@ TCPConnection::~TCPConnection() {
     try {
         if (active()) {
             cerr << "Warning: Unclean shutdown of TCPConnection\n";
-
+            send_rst_seg();
             // Your code here: need to send a RST segment to the peer
         }
     } catch (const exception &e) {
@@ -110,10 +119,16 @@ TCPConnection::~TCPConnection() {
 }
 
 void TCPConnection::handle_rst_rev(){
-
+    _sender.stream_in().set_error();
+    _receiver.stream_out().set_error();
+    _linger_after_streams_finish = false;
 }
 
 void TCPConnection::fill_window(bool create_empty) {
+    if(_sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS ){
+        send_rst_seg();
+        return;
+    }
     _sender.fill_window();
     auto&ssegment_out = _sender.segments_out();
     if(ssegment_out.empty()&&create_empty) {
@@ -126,7 +141,11 @@ void TCPConnection::fill_window(bool create_empty) {
             seg.header().ack = true;
             seg.header().ackno = _receiver.ackno().value();
         }
-        seg.header().win = _receiver.window_size();
+        if(_receiver.window_size() > MAX_WINSIZE){
+            seg.header().win=MAX_WINSIZE;
+        }else{
+            seg.header().win = _receiver.window_size();
+        }
         _segments_out.push(seg);
     }
     set_linger_after_streams_finish();
@@ -134,7 +153,7 @@ void TCPConnection::fill_window(bool create_empty) {
 
 bool TCPConnection::is_ack_seg(const TCPSegment&seg){
     auto header = seg.header();
-    return (!header.urg&&!header.psh&&!header.rst&&!header.syn&&!header.fin&&header.ack);
+    return (!header.urg&&!header.psh&&!header.rst&&!header.syn&&!header.fin&&header.ack&&seg.payload().size()==0);
 }
 
 
@@ -147,3 +166,13 @@ void TCPConnection::set_linger_after_streams_finish(){
         _linger_after_streams_finish = false;
     }
 }
+
+void TCPConnection::send_rst_seg(){
+    _linger_after_streams_finish = false;
+    _sender.stream_in().set_error();
+    _receiver.stream_out().set_error();
+    TCPSegment seg;
+    seg.header().rst = true;
+    _segments_out.push(seg);
+}
+

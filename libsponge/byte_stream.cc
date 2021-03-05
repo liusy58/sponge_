@@ -18,6 +18,9 @@ ByteStream::ByteStream(const size_t capacity):_capacity(capacity), _input_ended(
 // Write a string of bytes into the stream. 
 //Write as many as will fit, and return the number of bytes written.
 size_t ByteStream::write(const string &data) {
+    if(remaining_capacity() < data.size()){
+        std::cerr<<"!!!!in write remaining capacity is " << remaining_capacity()<< "but str size is "<<data.size()<<std::endl;
+    }
     auto len = min(data.size(),remaining_capacity());
     size_t i=0;
     for(auto c:data){

@@ -24,7 +24,9 @@ class TCPReceiver {
     uint64_t _abseq{0};
     uint64_t _checkpoint{0};
     bool _fin_rev{false};
+    bool _rev_seg_out{false};
   public:
+
     //! \brief Construct a TCP receiver
     //!
     //! \param capacity the maximum number of bytes that the receiver will
@@ -67,7 +69,9 @@ class TCPReceiver {
     //!@}
 
     void set_stream_error(){_reassembler.set_stream_error();}
-    bool seg_out_win(const TCPSegment&seg);
+    bool seg_out_win(){
+        return _rev_seg_out;
+    }
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_RECEIVER_HH

@@ -42,6 +42,7 @@ class TCPConnection {
     void set_state(State state){_state = state;}
     void fill_window(bool create_empty);
     void set_linger_after_streams_finish();
+    void send_rst_seg();
   public:
     //! \name "Input" interface for the writer
     //!@{

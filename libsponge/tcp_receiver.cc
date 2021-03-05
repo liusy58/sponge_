@@ -12,13 +12,18 @@ using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
     auto header = seg.header();
-    auto playload = seg.payload();
+    auto payload = seg.payload();
     uint64_t index = 0;
     if(header.syn){
         _isn_recv = true;
         _isn = header.seqno;
     }else{
         index = unwrap(header.seqno,_isn,_reassembler.first_unread()+1)-1;
+        if(index+seg.payload().size()<=_reassembler.first_unread()){
+            _rev_seg_out = true;
+        }else{
+            _rev_seg_out = false;
+        }
     }
     if(!_isn_recv){
         return;
@@ -26,7 +31,7 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     if(header.fin){
         _fin_rev=true;
     }
-    _reassembler.push_substring(playload.copy(),index,header.fin);
+    _reassembler.push_substring(payload.copy(),index,header.fin);
 }
 
 
@@ -54,10 +59,4 @@ size_t TCPReceiver::window_size() const {
     return _reassembler.window_size();
  }
 
- bool TCPReceiver::seg_out_win(const TCPSegment&seg){
-     auto header = seg.header();
-     auto playload = seg.payload();
-     uint64_t index = 0;
-     index = unwrap(header.seqno,_isn,_reassembler.first_unread()+1)-1;
-     return _reassembler.is_out_win(index,playload.size());
- }
+

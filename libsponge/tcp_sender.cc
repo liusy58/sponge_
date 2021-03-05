@@ -198,6 +198,9 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
 }
 
 void TCPSender::handle_zero_win(){
+    if(_stream.buffer_empty()){
+        return;
+    }
     size_t len = 1;
     string str = _stream.read(len);
     TCPSegment seg;

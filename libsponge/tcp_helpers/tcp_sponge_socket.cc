@@ -99,6 +99,7 @@ void TCPSpongeSocket<AdaptT>::_initialize_TCP(const TCPConfig &config) {
             const auto len = data.size();
             const auto amount_written = _tcp->write(move(data));
             if (amount_written != len) {
+                std::cerr<<"The amout_written is "<< amount_written << "  but the len is "<<len<<std::endl;
                 throw runtime_error("TCPConnection::write() accepted less than advertised length");
             }
 

@@ -28,6 +28,7 @@ int main() {
 
         // loop segments back into the same FSM
         for (unsigned rep_no = 0; rep_no < NREPS; ++rep_no) {
+
             const WrappingInt32 rx_offset(rd());
             TCPTestHarness test_1 = TCPTestHarness::in_established(cfg, rx_offset - 1, rx_offset - 1);
             test_1.send_ack(rx_offset, rx_offset, 65000);
@@ -65,6 +66,9 @@ int main() {
                     test_1.execute(SendSegment{move(seg)});
                     test_1.execute(Tick(1));
                 }
+                std::cerr<<"!!!"<<test_1._fsm.segments_out().size()<<std::endl;
+
+
                 test_1.execute(ExpectNoSegment{});
 
                 test_1.execute(ExpectBytesInFlight{0});
