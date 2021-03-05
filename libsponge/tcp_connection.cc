@@ -168,6 +168,9 @@ void TCPConnection::set_linger_after_streams_finish(){
 }
 
 void TCPConnection::send_rst_seg(){
+    while(!_segments_out.empty()){
+        _segments_out.pop();
+    }
     _linger_after_streams_finish = false;
     _sender.stream_in().set_error();
     _receiver.stream_out().set_error();
