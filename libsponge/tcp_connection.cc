@@ -84,6 +84,9 @@ size_t TCPConnection::write(const string &data) {
 void TCPConnection::tick(const size_t ms_since_last_tick) {
     _sender.tick(ms_since_last_tick);
     _time_since_last_segment_received += ms_since_last_tick;
+    if(_sender.consecutive_retransmissions()>TCPConfig::MAX_RETX_ATTEMPTS){
+        send_rst_seg();
+    }
     // the connection is only done after enough time (10 × cfg.rt timeout) has
     // elapsed since the last segment was received.
     if(_time_since_last_segment_received >= _cfg.rt_timeout*10 &&_receiver.stream_out().eof()&&_sender.stream_in().eof()){
@@ -121,7 +124,6 @@ TCPConnection::~TCPConnection() {
 void TCPConnection::handle_rst_rev(){
     _sender.stream_in().set_error();
     _receiver.stream_out().set_error();
-    _linger_after_streams_finish = false;
 }
 
 void TCPConnection::fill_window(bool create_empty) {
@@ -171,11 +173,15 @@ void TCPConnection::send_rst_seg(){
     while(!_segments_out.empty()){
         _segments_out.pop();
     }
-    _linger_after_streams_finish = false;
-    _sender.stream_in().set_error();
-    _receiver.stream_out().set_error();
     TCPSegment seg;
     seg.header().rst = true;
+    if(_receiver.ackno().has_value()){
+        seg.header().ack = true;
+        seg.header().ackno = _receiver.ackno().value();
+    }
     _segments_out.push(seg);
+    _sender.stream_in().set_error();
+    _receiver.stream_out().set_error();
+    _linger_after_streams_finish = false;
 }
 

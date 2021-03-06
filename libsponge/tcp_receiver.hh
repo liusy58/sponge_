@@ -20,13 +20,20 @@ class TCPReceiver {
     //! The maximum number of bytes we'll store.
     size_t _capacity;
     bool _isn_recv{false};
-    WrappingInt32 _isn{0};
+    std::optional<WrappingInt32> _isn{};
     uint64_t _abseq{0};
     uint64_t _checkpoint{0};
     bool _fin_rev{false};
     bool _rev_seg_out{false};
-  public:
 
+    enum class TCPReceiverStateSummary {
+        ERROR,     // "error (connection was reset)";
+        LISTEN,    // = "waiting for SYN: ackno is empty";
+        SYN_RECV,  //= "SYN received (ackno exists), and input to stream hasn't ended";
+        FIN_RECV   //= "input to stream has ended";
+    };
+
+  public:
     //! \brief Construct a TCP receiver
     //!
     //! \param capacity the maximum number of bytes that the receiver will
@@ -67,10 +74,16 @@ class TCPReceiver {
     ByteStream &stream_out() { return _reassembler.stream_out(); }
     const ByteStream &stream_out() const { return _reassembler.stream_out(); }
     //!@}
-
-    void set_stream_error(){_reassembler.set_stream_error();}
-    bool seg_out_win(){
-        return _rev_seg_out;
+    TCPReceiverStateSummary state_summary()const {
+        if (stream_out().error()) {
+            return TCPReceiverStateSummary::ERROR;
+        } else if (not _isn.has_value()) {
+            return TCPReceiverStateSummary::LISTEN;
+        } else if (stream_out().input_ended()) {
+            return TCPReceiverStateSummary::FIN_RECV;
+        } else {
+            return TCPReceiverStateSummary::SYN_RECV;
+        }
     }
 };
 
