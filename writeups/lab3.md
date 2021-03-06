@@ -25,3 +25,15 @@ Remaining Bugs:
 - Optional: I was surprised by: [describe]
 
 - Optional: I'm not sure about: [describe]
+
+I think the only way to fully understand TCP is to materialize the state variable.
+
+
+
+resend:
+* TCPSegments and deciding if the oldest-sent segment has been outstanding for too long
+  without acknowledgment (that is, without all of its sequence numbers being acknowledged).
+  If so, it needs to be retransmitted (sent again).
+  
+* 
+ 

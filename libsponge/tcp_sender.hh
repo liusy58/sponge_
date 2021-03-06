@@ -107,13 +107,9 @@ class TCPSender {
     std::deque<Data> _segment_in_flight{};
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0}; //
-    uint64_t _last_rev_seqno{static_cast<uint64_t>(-1)};
+    uint64_t _last_rev_seqno{0};
     uint64_t _bytes_in_flight{0}; //
     unsigned int _consecutive_retransmissions{0};// the counter of consecutive retransmmision
-    bool _send_zero_win{false};
-    bool _zero_win_handled{false};
-    Fin_seq _fin_seq{false,0};
-    bool _fin_send{false};
     void reset_consecutive_retransmission(){
         _consecutive_retransmissions = 0;
     }
@@ -122,20 +118,25 @@ class TCPSender {
 
     void handle_zero_win();
     void check_fin();
-    void resend_fin_segment();
-    void send_fin_segment();
+
     void retransmit();
 
 
+    void send_syn_segment();
+    void resend_fin_segment();
+    void send_fin_segment();
+    void  read_from_stream_to_segments();
   public:
-    enum TCPSenderState{
-        ERROR = 0,
-        CLOSED = 1,
-        SYN_SENT = 2,
-        SYN_ACKED = 3,
-        FIN_SENT = 4,
-        FIN_ACKED = 5
-    };
+    enum class TCPSenderStateSummary {
+        ERROR,      //= "error (connection was reset)";
+        CLOSED,     //= "waiting for stream to begin (no SYN sent)";
+        SYN_SENT,   //= "stream started but nothing acknowledged";
+        SYN_ACKED1,  //= "stream ongoing";
+        SYN_ACKED2,  //= "stream ongoing";
+        FIN_SENT,   //= "stream finished (FIN sent) but not fully acknowledged";
+        FIN_ACKED,  //= "stream finished and fully acknowledged";
+    };              // namespace TCPSenderStateSummary
+    enum TCPSenderState { ERROR = 0, CLOSED = 1, SYN_SENT = 2, SYN_ACKED = 3, FIN_SENT = 4, FIN_ACKED = 5 };
     TCPSenderState _status{TCPSenderState::CLOSED};
     void set_status(TCPSenderState status);
     //! Initialize a TCPSender
@@ -193,8 +194,24 @@ class TCPSender {
     WrappingInt32 next_seqno() const { return wrap(_next_seqno, _isn); }
     //!@}
     void send_totally_empty_seg();
-    bool is_full_acked()const{
-        return !_bytes_in_flight;
+    bool is_full_acked() const { return !_bytes_in_flight; }
+
+     TCPSenderStateSummary state_summary() {
+        if (stream_in().error()) {
+            return TCPSenderStateSummary::ERROR;
+        } else if (next_seqno_absolute() == 0) {
+            return TCPSenderStateSummary::CLOSED;
+        } else if (next_seqno_absolute() == bytes_in_flight()) {
+            return TCPSenderStateSummary::SYN_SENT;
+        } else if (not stream_in().eof()) {
+            return TCPSenderStateSummary::SYN_ACKED1;
+        } else if (next_seqno_absolute() < stream_in().bytes_written() + 2) {
+            return TCPSenderStateSummary::SYN_ACKED2;
+        } else if (bytes_in_flight()) {
+            return TCPSenderStateSummary::FIN_SENT;
+        } else {
+            return TCPSenderStateSummary::FIN_ACKED;
+        }
     }
 };
 
