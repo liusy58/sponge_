@@ -23,7 +23,7 @@ class TCPReceiver {
 
 
   public:
-    enum class TCPReceiverStateSummary {
+    enum class TCPReceiverState {
         ERROR,     // "error (connection was reset)";
         LISTEN,    // = "waiting for SYN: ackno is empty";
         SYN_RECV,  //= "SYN received (ackno exists), and input to stream hasn't ended";
@@ -69,17 +69,19 @@ class TCPReceiver {
     ByteStream &stream_out() { return _reassembler.stream_out(); }
     const ByteStream &stream_out() const { return _reassembler.stream_out(); }
     //!@}
-    TCPReceiverStateSummary state_summary()const {
+    TCPReceiverState state_summary()const {
         if (stream_out().error()) {
-            return TCPReceiverStateSummary::ERROR;
+            return TCPReceiverState::ERROR;
         } else if (not _isn.has_value()) {
-            return TCPReceiverStateSummary::LISTEN;
+            return TCPReceiverState::LISTEN;
         } else if (stream_out().input_ended()) {
-            return TCPReceiverStateSummary::FIN_RECV;
+            return TCPReceiverState::FIN_RECV;
         } else {
-            return TCPReceiverStateSummary::SYN_RECV;
+            return TCPReceiverState::SYN_RECV;
         }
     }
+
+
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_RECEIVER_HH

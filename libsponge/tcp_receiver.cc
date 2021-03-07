@@ -17,9 +17,9 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
     auto header = seg.header();
     auto payload = seg.payload();
     switch(state_summary()){
-        case TCPReceiverStateSummary::ERROR:
+        case TCPReceiverState::ERROR:
             return;
-        case TCPReceiverStateSummary::LISTEN:{
+        case TCPReceiverState::LISTEN:{
             // only accept syn segment!!
             if(header.syn) {
                 _isn = header.seqno;
@@ -27,12 +27,12 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
             }
             break;
         }
-        case TCPReceiverStateSummary::SYN_RECV:{
+        case TCPReceiverState::SYN_RECV:{
             index = unwrap(header.seqno,_isn.value(),_reassembler.first_unread()+1)-1;
             _reassembler.push_substring(payload.copy(),index,header.fin);
             break;
         }
-        case TCPReceiverStateSummary::FIN_RECV:{
+        case TCPReceiverState::FIN_RECV:{
             cerr<<"In state FIN_RECV but recv a seg?"<<endl;
             break;
         }
@@ -44,17 +44,17 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
 //! of the first byte in the stream that the receiver hasn't received.
 optional<WrappingInt32> TCPReceiver::ackno() const {
     switch (state_summary()){
-        case TCPReceiverStateSummary::ERROR:{
+        case TCPReceiverState::ERROR:{
             cerr<<"In state ERROR but call ackno"<<endl;
             return {};
         }
-        case TCPReceiverStateSummary::LISTEN:{
+        case TCPReceiverState::LISTEN:{
             return {};
         }
-        case TCPReceiverStateSummary::SYN_RECV:{
+        case TCPReceiverState::SYN_RECV:{
             return WrappingInt32(_isn.value()+1+_reassembler.first_unread());
         }
-        case TCPReceiverStateSummary::FIN_RECV:{
+        case TCPReceiverState::FIN_RECV:{
             if(_reassembler.empty()){
                 return WrappingInt32(_isn.value()+2+_reassembler.first_unread());
             }

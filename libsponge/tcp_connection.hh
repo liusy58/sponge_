@@ -11,7 +11,7 @@
 class TCPConnection {
   private:
     enum class State {
-        LISTEN = 0,   //!< Listening for a peer to connect
+        LISTEN,       //!< Listening for a peer to connect
         SYN_RCVD,     //!< Got the peer's SYN
         SYN_SENT,     //!< Sent a SYN to initiate a connection
         ESTABLISHED,  //!< Three-way handshake complete
@@ -23,6 +23,7 @@ class TCPConnection {
         TIME_WAIT,    //!< Both sides have sent FIN and ACK'd, waiting for 2 MSL
         CLOSED,       //!< A connection that has terminated normally
         RESET,        //!< A connection that terminated abnormally
+        NULLSTATE
     };
     TCPConfig _cfg;
     TCPReceiver _receiver{_cfg.recv_capacity};
@@ -36,14 +37,13 @@ class TCPConnection {
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
     size_t _time_since_last_segment_received{0};
-    State _state{State::CLOSED};
-    bool _remote_first_end{false};
     void handle_rst_rev();
-    void set_state(State state){_state = state;}
     void fill_window(bool create_empty);
     void set_linger_after_streams_finish();
     void send_rst_seg();
+    bool three_pre()const;
   public:
+    //! \brief Official state names from the [TCP](\ref rfc::rfc793) specification
     //! \name "Input" interface for the writer
     //!@{
 
@@ -120,10 +120,63 @@ class TCPConnection {
     TCPConnection &operator=(const TCPConnection &other) = delete;
     //!@}
 
-    bool is_state_valid(std::vector<State>states){
-        return std::find(states.begin(),states.end(),_state)!=states.end();
+    bool is_ack_seg(const TCPSegment &seg);
+
+    State state_summary() {
+        auto _rev_state = _receiver.state_summary();
+        auto _send_state = _sender.state_summary();
+        if (_rev_state == TCPReceiver::TCPReceiverState::LISTEN && _send_state == TCPSender::TCPSenderState::CLOSED) {
+            return State::LISTEN;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::SYN_RECV &&
+            _send_state == TCPSender::TCPSenderState::SYN_SENT) {
+            return State::SYN_RCVD;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::LISTEN && _send_state == TCPSender::TCPSenderState::SYN_SENT) {
+            return State::SYN_SENT;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::SYN_RECV &&
+            (_send_state == TCPSender::TCPSenderState::SYN_ACKED1 ||
+             _send_state == TCPSender::TCPSenderState::SYN_ACKED2) &&
+            !_linger_after_streams_finish) {
+            return State::ESTABLISHED;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
+            (_send_state == TCPSender::TCPSenderState::SYN_ACKED1 ||
+             _send_state == TCPSender::TCPSenderState::SYN_ACKED2) &&
+            !_linger_after_streams_finish) {
+            return State::CLOSE_WAIT;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_SENT && !_linger_after_streams_finish) {
+            return State::LAST_ACK;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_SENT) {
+            return State::CLOSING;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::SYN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_SENT) {
+            return State::FIN_WAIT_1;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::SYN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_ACKED) {
+            return State::FIN_WAIT_2;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_ACKED) {
+            return State::TIME_WAIT;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::ERROR && _send_state == TCPSender::TCPSenderState::ERROR &&
+            !_linger_after_streams_finish && !active()) {
+            return State::RESET;
+        }
+        if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
+            _send_state == TCPSender::TCPSenderState::FIN_ACKED && !_linger_after_streams_finish && !active()) {
+            return State::CLOSED;
+        }
+        return State::NULLSTATE;
     }
-    bool is_ack_seg(const TCPSegment&seg);
 };
 
 

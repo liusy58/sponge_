@@ -30,30 +30,30 @@ uint64_t TCPSender::bytes_in_flight() const {
 
 void TCPSender::fill_window() {
     switch (state_summary()) {
-        case TCPSenderStateSummary::ERROR:{
+        case TCPSenderState::ERROR:{
             std::cerr<<"In state Error but call fill_window "<<std::endl;
             break;
         }
-        case TCPSenderStateSummary::CLOSED:{
+        case TCPSenderState::CLOSED:{
             send_syn_segment();
             break;
         }
-        case TCPSenderStateSummary::SYN_SENT:{
+        case TCPSenderState::SYN_SENT:{
             break;
         }
-        case TCPSenderStateSummary::SYN_ACKED1:{
+        case TCPSenderState::SYN_ACKED1:{
             read_from_stream_to_segments();
             break;
         }
-        case TCPSenderStateSummary::SYN_ACKED2:{
+        case TCPSenderState::SYN_ACKED2:{
             send_fin_segment();
             break;
         }
-        case TCPSenderStateSummary::FIN_SENT:{
+        case TCPSenderState::FIN_SENT:{
             std::cerr<<"In state FIN_ACKED but call fill_window so we need to resend the fin segment"<<std::endl;
             break;
         }
-        case TCPSenderStateSummary::FIN_ACKED:{
+        case TCPSenderState::FIN_ACKED:{
             std::cerr<<"In state FIN_ACKED but call fill_window "<<std::endl;
             break;
         }
@@ -63,6 +63,7 @@ void TCPSender::fill_window() {
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
+
     _rev_win = window_size;
     if(!_rev_win){
         _rev_win = 1;
@@ -78,8 +79,12 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
     if(!_timer.is_start()){
         return;
     }
+    if(!_bytes_in_flight){
+        _timer.close();
+        return;
+    }
     _timer.add_time(ms_since_last_tick);
-    if(_timer.is_expired()){
+    if(_timer.is_expired()&&_bytes_in_flight>0){
         retransmit();
         _timer.double_rto();
         _timer.timer_restart();
@@ -128,21 +133,21 @@ void TCPSender::retransmit() {
         return;
     }
     switch (state_summary()){
-        case TCPSenderStateSummary::ERROR:
-        case TCPSenderStateSummary::CLOSED:
-        case TCPSenderStateSummary::FIN_ACKED:{
+        case TCPSenderState::ERROR:
+        case TCPSenderState::CLOSED:
+        case TCPSenderState::FIN_ACKED:{
             std::cerr<<"In state ERROR or CLOSED or FIN_ACKED but call retransmit"<<std::endl;
             break;
         }
-        case TCPSenderStateSummary::SYN_SENT:{
+        case TCPSenderState::SYN_SENT:{
             send_syn_segment();
             break;
         }
-        case TCPSenderStateSummary::SYN_ACKED1:
-        case TCPSenderStateSummary::SYN_ACKED2:
-        case TCPSenderStateSummary::FIN_SENT:{
+        case TCPSenderState::SYN_ACKED1:
+        case TCPSenderState::SYN_ACKED2:
+        case TCPSenderState::FIN_SENT:{
             if(_segment_in_flight.empty()){
-                if(state_summary() == TCPSenderStateSummary::FIN_SENT){
+                if(state_summary() == TCPSenderState::FIN_SENT){
                     resend_fin_segment();
                 }
                 break;
@@ -160,22 +165,22 @@ void TCPSender::retransmit() {
 void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
     uint64_t seq_no = unwrap(ackno,_isn,_next_seqno);
     switch (state_summary()) {
-        case TCPSenderStateSummary::ERROR:
-        case TCPSenderStateSummary::CLOSED:
-        case TCPSenderStateSummary::FIN_ACKED:{
+        case TCPSenderState::ERROR:
+        case TCPSenderState::CLOSED:
+        case TCPSenderState::FIN_ACKED:{
             std::cerr<<" In state ERROR or CLOSED or FIN_ACKED"<<std::endl;
             break;
         }
-        case TCPSenderStateSummary::SYN_SENT:{
+        case TCPSenderState::SYN_SENT:{
             if(seq_no == 1){
                 _last_rev_seqno = seq_no;
                 _bytes_in_flight-=1;
             }
             break;
         }
-        case TCPSenderStateSummary::SYN_ACKED1:
-        case TCPSenderStateSummary::SYN_ACKED2:
-        case TCPSenderStateSummary::FIN_SENT:{
+        case TCPSenderState::SYN_ACKED1:
+        case TCPSenderState::SYN_ACKED2:
+        case TCPSenderState::FIN_SENT:{
             if(seq_no>_last_rev_seqno){
                 _last_rev_seqno = seq_no;
                 _timer._reset_rto();

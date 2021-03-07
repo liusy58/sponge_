@@ -18,12 +18,6 @@
 //! segments if the retransmission timer expires.
 class TCPSender {
   private:
-    class Fin_seq{
-      public:
-        bool _is_valid;
-        uint64_t _seq_no;
-        Fin_seq(bool is_valid,uint64_t seq):_is_valid(is_valid),_seq_no(seq){}
-    };
 
     class Timer{
       private:
@@ -37,9 +31,6 @@ class TCPSender {
             _initial_retransmission_timeout(retx_timeout),
             _current_retransmission_timeout(retx_timeout),
             _time_elapsed(0){}
-        void start(){
-            _start = true;
-        }
         bool is_start(){
             return _start;
         }
@@ -116,8 +107,6 @@ class TCPSender {
 
     void update_flights_in_flight(const WrappingInt32 ackno);
 
-    void handle_zero_win();
-    void check_fin();
 
     void retransmit();
 
@@ -127,7 +116,7 @@ class TCPSender {
     void send_fin_segment();
     void  read_from_stream_to_segments();
   public:
-    enum class TCPSenderStateSummary {
+    enum class TCPSenderState {
         ERROR,      //= "error (connection was reset)";
         CLOSED,     //= "waiting for stream to begin (no SYN sent)";
         SYN_SENT,   //= "stream started but nothing acknowledged";
@@ -136,9 +125,7 @@ class TCPSender {
         FIN_SENT,   //= "stream finished (FIN sent) but not fully acknowledged";
         FIN_ACKED,  //= "stream finished and fully acknowledged";
     };              // namespace TCPSenderStateSummary
-    enum TCPSenderState { ERROR = 0, CLOSED = 1, SYN_SENT = 2, SYN_ACKED = 3, FIN_SENT = 4, FIN_ACKED = 5 };
     TCPSenderState _status{TCPSenderState::CLOSED};
-    void set_status(TCPSenderState status);
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
               const uint16_t retx_timeout = TCPConfig::TIMEOUT_DFLT,
@@ -196,21 +183,21 @@ class TCPSender {
     void send_totally_empty_seg();
     bool is_full_acked() const { return !_bytes_in_flight; }
 
-     TCPSenderStateSummary state_summary() {
+    TCPSenderState state_summary()const {
         if (stream_in().error()) {
-            return TCPSenderStateSummary::ERROR;
+            return TCPSenderState::ERROR;
         } else if (next_seqno_absolute() == 0) {
-            return TCPSenderStateSummary::CLOSED;
+            return TCPSenderState::CLOSED;
         } else if (next_seqno_absolute() == bytes_in_flight()) {
-            return TCPSenderStateSummary::SYN_SENT;
+            return TCPSenderState::SYN_SENT;
         } else if (not stream_in().eof()) {
-            return TCPSenderStateSummary::SYN_ACKED1;
+            return TCPSenderState::SYN_ACKED1;
         } else if (next_seqno_absolute() < stream_in().bytes_written() + 2) {
-            return TCPSenderStateSummary::SYN_ACKED2;
+            return TCPSenderState::SYN_ACKED2;
         } else if (bytes_in_flight()) {
-            return TCPSenderStateSummary::FIN_SENT;
+            return TCPSenderState::FIN_SENT;
         } else {
-            return TCPSenderStateSummary::FIN_ACKED;
+            return TCPSenderState::FIN_ACKED;
         }
     }
 };
