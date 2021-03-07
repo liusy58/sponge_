@@ -69,11 +69,6 @@ class StreamReassembler {
       return _output.remaining_capacity();
     }
 
-    void set_stream_error(){_output.set_error();}
-
-    bool is_out_win(uint64_t start,size_t size){
-        return start + size <= _first_unread;
-    }
 };
 
 

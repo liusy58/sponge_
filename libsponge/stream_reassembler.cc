@@ -130,12 +130,12 @@ void StreamReassembler::push2list(const string &data, const size_t index){
         }
 
     }
-    
     _data_list.push_back(new_data);
     _unassembled_bytes += new_data._data.size();
 
 }
 void StreamReassembler::write2stream(){
+
     std::sort(_data_list.begin(),_data_list.end(),[](Data&d1,Data&d2){return d1._start_index<d2._start_index;});
     for(auto iter = _data_list.begin();iter!=_data_list.end()&&_output.remaining_capacity()>0;){
         auto &_index = iter->_start_index;

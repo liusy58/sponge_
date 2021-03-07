@@ -13,7 +13,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 const uint16_t MAX_WINSIZE = std::numeric_limits<uint16_t>::max();
 size_t TCPConnection::remaining_outbound_capacity() const {
-    return _receiver.window_size();
+    return outbound_stream().remaining_capacity();
 }
 
 size_t TCPConnection::bytes_in_flight() const {

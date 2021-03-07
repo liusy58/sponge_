@@ -31,7 +31,7 @@ uint64_t TCPSender::bytes_in_flight() const {
 void TCPSender::fill_window() {
     switch (state_summary()) {
         case TCPSenderState::ERROR:{
-            std::cerr<<"In state Error but call fill_window "<<std::endl;
+            //std::cerr<<"In state Error but call fill_window "<<std::endl;
             break;
         }
         case TCPSenderState::CLOSED:{
@@ -50,11 +50,11 @@ void TCPSender::fill_window() {
             break;
         }
         case TCPSenderState::FIN_SENT:{
-            std::cerr<<"In state FIN_ACKED but call fill_window so we need to resend the fin segment"<<std::endl;
+            //std::cerr<<"TCPReceiver ::In state FIN_ACKED but call fill_window so we need to resend the fin segment"<<std::endl;
             break;
         }
         case TCPSenderState::FIN_ACKED:{
-            std::cerr<<"In state FIN_ACKED but call fill_window "<<std::endl;
+           // std::cerr<<"TCPReceiver ::In state FIN_ACKED but call fill_window "<<std::endl;
             break;
         }
     }
@@ -136,7 +136,7 @@ void TCPSender::retransmit() {
         case TCPSenderState::ERROR:
         case TCPSenderState::CLOSED:
         case TCPSenderState::FIN_ACKED:{
-            std::cerr<<"In state ERROR or CLOSED or FIN_ACKED but call retransmit"<<std::endl;
+            //std::cerr<<"TCPReceiver ::In state ERROR or CLOSED or FIN_ACKED but call retransmit"<<std::endl;
             break;
         }
         case TCPSenderState::SYN_SENT:{
@@ -168,7 +168,7 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
         case TCPSenderState::ERROR:
         case TCPSenderState::CLOSED:
         case TCPSenderState::FIN_ACKED:{
-            std::cerr<<" In state ERROR or CLOSED or FIN_ACKED"<<std::endl;
+           // std::cerr<<"TCPReceiver :: In state ERROR or CLOSED or FIN_ACKED"<<std::endl;
             break;
         }
         case TCPSenderState::SYN_SENT:{

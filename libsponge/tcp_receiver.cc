@@ -33,7 +33,7 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
             break;
         }
         case TCPReceiverState::FIN_RECV:{
-            cerr<<"In state FIN_RECV but recv a seg?"<<endl;
+           // cerr<<"In state FIN_RECV but recv a seg?"<<endl;
             break;
         }
     }
@@ -45,7 +45,7 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
 optional<WrappingInt32> TCPReceiver::ackno() const {
     switch (state_summary()){
         case TCPReceiverState::ERROR:{
-            cerr<<"In state ERROR but call ackno"<<endl;
+            cerr<<"TCPReceiver ::In state ERROR but call ackno"<<endl;
             return {};
         }
         case TCPReceiverState::LISTEN:{

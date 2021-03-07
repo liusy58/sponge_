@@ -18,35 +18,26 @@ ByteStream::ByteStream(const size_t capacity):_capacity(capacity), _input_ended(
 // Write a string of bytes into the stream. 
 //Write as many as will fit, and return the number of bytes written.
 size_t ByteStream::write(const string &data) {
+    //std::cerr<<"Bytestream::in write"<<std::endl;
     size_t index = 0;
-    while(index<data.size()&&remaining_capacity()>0){
+    size_t sz = min(data.size(),remaining_capacity());
+    while(index<sz){
         _buffer.push_back(data[index++]);
         _bytes_write++;
     }
-//    if(remaining_capacity() < data.size()){
-//        std::cerr<<"!!!!in write remaining capacity is " << remaining_capacity()<< "but str size is "<<data.size()<<std::endl;
-//    }
-//    auto len = min(data.size(),remaining_capacity());
-//    size_t i=0;
-//    for(auto c:data){
-//        if(i>=len){
-//            break;
-//        }
-//        _buffer.push_back(c);
-//        ++i;
-//    }
-    return index;
+    return sz;
 }
 
 //! \param[in] len bytes will be copied from the output side of the buffer
 string ByteStream::peek_output(const size_t len) const {
+    //std::cerr<<"Bytestream::in peek_out"<<std::endl;
     auto nbytes = min(len,_buffer.size());
     return string(_buffer.begin(),_buffer.begin()+nbytes);
 }
 
 //! \param[in] len bytes will be removed from the output side of the buffer
 void ByteStream::pop_output(const size_t len) {
-
+    //std::cerr<<"Bytestream::in pop_output"<<std::endl;
     auto nbytes = min(len,_buffer.size());
     _bytes_read += nbytes;
     while(nbytes--){

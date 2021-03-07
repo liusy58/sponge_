@@ -95,14 +95,18 @@ void TCPSpongeSocket<AdaptT>::_initialize_TCP(const TCPConfig &config) {
         _thread_data,
         Direction::In,
         [&] {
+            std::cerr<<"in rule~~~~~"<<std::endl;
+
+            auto prev_sz =  _tcp->remaining_outbound_capacity();
             const auto data = _thread_data.read(_tcp->remaining_outbound_capacity());
             const auto len = data.size();
             const auto amount_written = _tcp->write(move(data));
             if (amount_written != len) {
+                std::cerr << " prev_sz is "<< prev_sz << " and the data size is " <<data.size()<<" but now the size is "<<amount_written << std::endl;
                 std::cerr<<"The amout_written is "<< amount_written << "  but the len is "<<len<<std::endl;
+                std::cerr<<"!!!!!!!!!! in rule"<<std::endl;
                 throw runtime_error("TCPConnection::write() accepted less than advertised length");
             }
-
             if (_thread_data.eof()) {
                 _tcp->end_input_stream();
                 _outbound_shutdown = true;
