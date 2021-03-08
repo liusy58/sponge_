@@ -13,11 +13,11 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 const uint16_t MAX_WINSIZE = std::numeric_limits<uint16_t>::max();
 void TCPConnection::printSeg(const TCPSegment &seg){
-    DUMMY_CODE(seg);
-//    ssr << "pid is "<< to_string(getpid()) << "    segFlags: " << "A: " << seg.header().ack << " " << "S: " << seg.header().syn << " " << "F: " << seg.header().fin << " " << "R: " << seg.header().rst ;
-//    ssr << "    header num: " << "seqno: " << seg.header().seqno.raw_value() << " " << "ack: " << seg.header().ackno.raw_value() << " " << "win: " << seg.header().win ;
-//    ssr  << "   payload size : " << seg.payload().copy().size() << "\n";
-//    cerr<<ssr.str();
+//    DUMMY_CODE(seg);
+    ssr << "pid is "<< to_string(getpid()) << "    segFlags: " << "A: " << seg.header().ack << " " << "S: " << seg.header().syn << " " << "F: " << seg.header().fin << " " << "R: " << seg.header().rst ;
+    ssr << "    header num: " << "seqno: " << seg.header().seqno.raw_value() << " " << "ack: " << seg.header().ackno.raw_value() << " " << "win: " << seg.header().win ;
+    ssr  << "   payload size : " << seg.payload().copy().size() << "\n";
+    cerr<<ssr.str();
 }
 size_t TCPConnection::remaining_outbound_capacity() const {
     return outbound_stream().remaining_capacity();

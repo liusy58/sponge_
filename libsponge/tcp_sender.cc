@@ -118,6 +118,7 @@ void TCPSender::send_fin_segment() {
     if(_rev_win<=0 || _rev_win <= _bytes_in_flight){
         return;
     }
+    cerr << "I send a fin \n";
     TCPSegment seg;
     seg.header().fin = true;
     seg.header().seqno = next_seqno();
@@ -224,10 +225,9 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
                     iter++;
                 }
             }
-            str =  "pid is "+to_string(getpid())+" in FIN_SENT the seq_no is " + to_string(seq_no) + "_bytes_in_flight" + to_string(_bytes_in_flight)+ "byte writes is "+ to_string(stream_in().bytes_written()) + "\n" ;
-            cerr<<str;
-            if(seq_no == _next_seqno){
-                str =  "!!!!!pid is  "+to_string(getpid())+" in FIN_SENT the seq_no is " + to_string(seq_no) + "_bytes_in_flight" +to_string(_bytes_in_flight)+ "byte writes is "+ to_string(stream_in().bytes_written()) + "\n" ;
+            str =  "!!!!!pid is  "+to_string(getpid())+" in update_flights_in_flight the seq_no is " + to_string(seq_no) + "_bytes_in_flight" +to_string(_bytes_in_flight) +  "bytes read is  "+ to_string(stream_in().bytes_read()) + "    byte writes is "+ to_string(stream_in().bytes_written()) + "\n" ;
+            if(seq_no >= _next_seqno){
+
                 cerr<<str;
                 while(!_segment_in_flight.empty()){
                     _segment_in_flight.pop_back();
@@ -255,6 +255,7 @@ void TCPSender::read_from_stream_to_segments(){
         seg.payload() = Buffer(std::move(str));
         header.seqno = next_seqno();
         if(_rev_win>len&&_stream.eof()){
+            cerr << "I send a fin  in readfrom\n";
             header.fin = true;
         }
         header.seqno = next_seqno();
