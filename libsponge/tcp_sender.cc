@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <random>
-
+#include <unistd.h>
 // Dummy implementation of a TCP sender
 
 // For Lab 3, please replace with a real implementation that passes the
@@ -163,7 +163,10 @@ void TCPSender::retransmit() {
 }
 
 void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
+
     uint64_t seq_no = unwrap(ackno,_isn,_next_seqno);
+    string  str =  "in update_flights_in_flight and the seq_no is " + to_string(seq_no) +"\n";
+//    cerr<<str;
     switch (state_summary()) {
         case TCPSenderState::ERROR:
         case TCPSenderState::CLOSED:
@@ -173,8 +176,30 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
         }
         case TCPSenderState::SYN_SENT:{
             if(seq_no == 1){
+                cerr<<"I received a segment about my syn recv "<<endl;
                 _last_rev_seqno = seq_no;
                 _bytes_in_flight-=1;
+            }
+            if(seq_no>_last_rev_seqno){
+                _last_rev_seqno = seq_no;
+                _timer._reset_rto();
+                if(_bytes_in_flight){
+                    _timer.timer_restart();
+                }
+                reset_consecutive_retransmission();
+            }
+            for(auto iter = _segment_in_flight.begin();iter!=_segment_in_flight.end();){
+                auto _seq_no = iter->get_seq_no();
+                auto _seg = iter->get_seg();
+                if(_seq_no+_seg.length_in_sequence_space()<=seq_no){
+                    _bytes_in_flight -= _seg.length_in_sequence_space();
+                    iter = _segment_in_flight.erase(iter);
+                }else{
+                    iter++;
+                }
+            }
+            if(seq_no == _next_seqno&&_bytes_in_flight==1){
+                _bytes_in_flight -= 1;
             }
             break;
         }
@@ -199,8 +224,15 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
                     iter++;
                 }
             }
-            if(seq_no == _next_seqno&&_bytes_in_flight==1){
-                _bytes_in_flight -= 1;
+            str =  "pid is "+to_string(getpid())+" in FIN_SENT the seq_no is " + to_string(seq_no) + "_bytes_in_flight" + to_string(_bytes_in_flight)+ "byte writes is "+ to_string(stream_in().bytes_written()) + "\n" ;
+            cerr<<str;
+            if(seq_no == _next_seqno){
+                str =  "!!!!!pid is  "+to_string(getpid())+" in FIN_SENT the seq_no is " + to_string(seq_no) + "_bytes_in_flight" +to_string(_bytes_in_flight)+ "byte writes is "+ to_string(stream_in().bytes_written()) + "\n" ;
+                cerr<<str;
+                while(!_segment_in_flight.empty()){
+                    _segment_in_flight.pop_back();
+                }
+                _bytes_in_flight = 0;
             }
         }
     }

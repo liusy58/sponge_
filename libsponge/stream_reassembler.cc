@@ -10,7 +10,7 @@
 
 template <typename... Targs>
 void DUMMY_CODE(Targs &&... /* unused */) {}
-
+#include <unistd.h>
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),_unassembled_bytes(0),
@@ -20,6 +20,8 @@ _first_unread(0),_eof(false),_last_acceptable(0) {}
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
+//    string str =  "in push_substring " + to_string(index) + "the size is " + to_string(data.size())+"\n";
+//    cerr << str;
     if(eof){
         _eof=1;
         _last_acceptable = index +data.size();
@@ -31,6 +33,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     }
     size_t first_unacceptable = _first_unread + _capacity ;
     if(index>=first_unacceptable){
+        cerr << "cannot accept this !!!"<<endl;
         write2stream();
         //? what if eof?
         return;
@@ -93,10 +96,11 @@ int StreamReassembler::type_overlap(Data data1,Data data2){
 }
 
 void StreamReassembler::push2list(const string &data, const size_t index){
+
     string str = data;
     size_t i = index;
-    if(index < _first_unread){
-        size_t len = _first_unread - index;
+    if(i < _first_unread){
+        size_t len = _first_unread - i;
         str=str.substr(len);
         i = _first_unread;
     }
@@ -135,11 +139,13 @@ void StreamReassembler::push2list(const string &data, const size_t index){
 
 }
 void StreamReassembler::write2stream(){
-
+//    cerr << "in write2stream _first_unread is "<<_first_unread<<endl;
     std::sort(_data_list.begin(),_data_list.end(),[](Data&d1,Data&d2){return d1._start_index<d2._start_index;});
     for(auto iter = _data_list.begin();iter!=_data_list.end()&&_output.remaining_capacity()>0;){
         auto &_index = iter->_start_index;
         auto &_data = iter->_data;
+        string str =   "in write2stream _first_unread is "+to_string(_first_unread)   + "the _index is " +to_string(_index) +"\n";
+        cerr<<str;
         if(_index == _first_unread){
             auto bytes = _output.write(_data);
             if(bytes != _data.size()){
@@ -153,6 +159,8 @@ void StreamReassembler::write2stream(){
         }else{
             iter++;
         }
+        str =   "_first_unread is " + to_string(_first_unread) + "   pid is : "+to_string(getpid())+ "\n";
+        cerr<<str;
     }
     if(_eof&&_last_acceptable == _first_unread&&_data_list.empty()){
         _output.end_input();

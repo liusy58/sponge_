@@ -95,16 +95,14 @@ void TCPSpongeSocket<AdaptT>::_initialize_TCP(const TCPConfig &config) {
         _thread_data,
         Direction::In,
         [&] {
-            std::cerr<<"in rule~~~~~"<<std::endl;
-
-            auto prev_sz =  _tcp->remaining_outbound_capacity();
+            //std::cerr<<"in rule~~~~~"<<std::endl;
             const auto data = _thread_data.read(_tcp->remaining_outbound_capacity());
             const auto len = data.size();
             const auto amount_written = _tcp->write(move(data));
             if (amount_written != len) {
-                std::cerr << " prev_sz is "<< prev_sz << " and the data size is " <<data.size()<<" but now the size is "<<amount_written << std::endl;
-                std::cerr<<"The amout_written is "<< amount_written << "  but the len is "<<len<<std::endl;
-                std::cerr<<"!!!!!!!!!! in rule"<<std::endl;
+                //std::cerr << " prev_sz is "<< prev_sz << " and the data size is " <<data.size()<<" but now the size is "<<amount_written << std::endl;
+                //std::cerr<<"The amout_written is "<< amount_written << "  but the len is "<<len<<std::endl;
+                //std::cerr<<"!!!!!!!!!! in rule"<<std::endl;
                 throw runtime_error("TCPConnection::write() accepted less than advertised length");
             }
             if (_thread_data.eof()) {
@@ -112,9 +110,11 @@ void TCPSpongeSocket<AdaptT>::_initialize_TCP(const TCPConfig &config) {
                 _outbound_shutdown = true;
 
                 // debugging output:
-                cerr << "DEBUG: Outbound stream to " << _datagram_adapter.config().destination.to_string()
-                     << " finished (" << _tcp.value().bytes_in_flight() << " byte"
-                     << (_tcp.value().bytes_in_flight() == 1 ? "" : "s") << " still in flight).\n";
+                string str =   "DEBUG: Outbound stream to " + _datagram_adapter.config().destination.to_string()
+                     + " finished (" + to_string(_tcp.value().bytes_in_flight() )+ " byte"
+                     + (_tcp.value().bytes_in_flight() == 1 ? "" : "s") + " still in flight)."
+                    + "bytes write" + to_string( _tcp.value().outbound_stream().bytes_written())+"\n";
+                cerr << str;
             }
         },
         [&] { return (_tcp->active()) and (not _outbound_shutdown) and (_tcp->remaining_outbound_capacity() > 0); },

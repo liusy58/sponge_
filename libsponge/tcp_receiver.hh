@@ -23,8 +23,8 @@ class TCPReceiver {
 
 
   public:
-    enum class TCPReceiverState {
-        ERROR,     // "error (connection was reset)";
+    enum  TCPReceiverState {
+        ERROR=0,     // "error (connection was reset)";
         LISTEN,    // = "waiting for SYN: ackno is empty";
         SYN_RECV,  //= "SYN received (ackno exists), and input to stream hasn't ended";
         FIN_RECV   //= "input to stream has ended";

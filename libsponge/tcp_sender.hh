@@ -116,8 +116,8 @@ class TCPSender {
     void send_fin_segment();
     void  read_from_stream_to_segments();
   public:
-    enum class TCPSenderState {
-        ERROR,      //= "error (connection was reset)";
+    enum  TCPSenderState {
+        ERROR=0,      //= "error (connection was reset)";
         CLOSED,     //= "waiting for stream to begin (no SYN sent)";
         SYN_SENT,   //= "stream started but nothing acknowledged";
         SYN_ACKED1,  //= "stream ongoing";

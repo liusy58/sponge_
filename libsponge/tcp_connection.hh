@@ -5,13 +5,15 @@
 #include "tcp_receiver.hh"
 #include "tcp_sender.hh"
 #include "tcp_state.hh"
-
+#include <iostream>
+#include <fstream>
 #include <vector>
+#include <sstream>
 //! \brief A complete endpoint of a TCP connection
 class TCPConnection {
   private:
-    enum class State {
-        LISTEN,       //!< Listening for a peer to connect
+    enum  State {
+        LISTEN=0,       //!< Listening for a peer to connect
         SYN_RCVD,     //!< Got the peer's SYN
         SYN_SENT,     //!< Sent a SYN to initiate a connection
         ESTABLISHED,  //!< Three-way handshake complete
@@ -37,11 +39,12 @@ class TCPConnection {
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
     size_t _time_since_last_segment_received{0};
-    void handle_rst_rev();
     void fill_window(bool create_empty);
     void set_linger_after_streams_finish();
     void send_rst_seg();
     bool three_pre()const;
+    std::stringstream ssr;
+    //std::ofstream myfile;
   public:
     //! \brief Official state names from the [TCP](\ref rfc::rfc793) specification
     //! \name "Input" interface for the writer
@@ -106,7 +109,8 @@ class TCPConnection {
     //!@}
 
     //! Construct a new connection from a configuration
-    explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {}
+    //myfile( std::to_string(_cfg.fixed_isn.value().raw_value()), ios::out | ios::app | ios::binary)
+    explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg},ssr{}{}
 
     //! \name construction and destruction
     //! moving is allowed; copying is disallowed; default construction not possible
@@ -137,8 +141,7 @@ class TCPConnection {
         }
         if (_rev_state == TCPReceiver::TCPReceiverState::SYN_RECV &&
             (_send_state == TCPSender::TCPSenderState::SYN_ACKED1 ||
-             _send_state == TCPSender::TCPSenderState::SYN_ACKED2) &&
-            !_linger_after_streams_finish) {
+             _send_state == TCPSender::TCPSenderState::SYN_ACKED2) ){
             return State::ESTABLISHED;
         }
         if (_rev_state == TCPReceiver::TCPReceiverState::FIN_RECV &&
@@ -175,8 +178,11 @@ class TCPConnection {
             _send_state == TCPSender::TCPSenderState::FIN_ACKED && !_linger_after_streams_finish && !active()) {
             return State::CLOSED;
         }
+
+        //std::cerr << "sender state is " << _send_state << "   receiver state is "<< _rev_state<<std::endl;
         return State::NULLSTATE;
     }
+    void printSeg(const TCPSegment &seg);
 };
 
 

@@ -1,7 +1,7 @@
 #include "tcp_receiver.hh"
 
 #include <iostream>
-
+#include <unistd.h>
 // Dummy implementation of a TCP receiver
 
 // For Lab 2, please replace with a real implementation that passes the
@@ -43,6 +43,8 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
 //! This is the beginning of the receiver's window, or in other words, the sequence number
 //! of the first byte in the stream that the receiver hasn't received.
 optional<WrappingInt32> TCPReceiver::ackno() const {
+//    string str = "In ackno the state is " + to_string(state_summary())+"\n";
+//    cerr <<str;
     switch (state_summary()){
         case TCPReceiverState::ERROR:{
             cerr<<"TCPReceiver ::In state ERROR but call ackno"<<endl;
@@ -52,6 +54,8 @@ optional<WrappingInt32> TCPReceiver::ackno() const {
             return {};
         }
         case TCPReceiverState::SYN_RECV:{
+            string str = "the pid is "+ to_string(getpid())+"in tcp_receiver and the ackno is " + to_string(WrappingInt32(_isn.value()+1+_reassembler.first_unread()).raw_value()) + "and the _reassembler.first_unread() is "+to_string(_reassembler.first_unread())+"\n";
+            cerr<<str;
             return WrappingInt32(_isn.value()+1+_reassembler.first_unread());
         }
         case TCPReceiverState::FIN_RECV:{
