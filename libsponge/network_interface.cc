@@ -50,7 +50,15 @@ void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Addres
             frame.header().type = EthernetHeader::TYPE_ARP;
             frame.header().src = _ethernet_address;
             frame.header().dst = ETHERNET_BROADCAST;
+            ARPMessage rep_arp;
+            rep_arp.opcode = ARPMessage::OPCODE_REQUEST;
+            rep_arp.sender_ip_address = _ip_address.ipv4_numeric();
+            rep_arp.sender_ethernet_address = _ethernet_address;
+            rep_arp.target_ip_address = next_hop_ip;
+            frame.payload() = rep_arp.serialize();
             _frames_out.push(frame);
+            _arp_in_flight.insert(next_hop_ip);
+            _arp2tick[next_hop_ip] = 0;
             _waiting_datagrams.push_back({dgram,next_hop});
         }
     }
@@ -58,9 +66,11 @@ void NetworkInterface::send_datagram(const InternetDatagram &dgram, const Addres
 
 //! \param[in] frame the incoming Ethernet frame
 optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &frame) {
+    //cerr <<"in recv"<<endl;
     if(should_ignore(frame)){
         return {};
     }
+    //cerr<<"here"<<endl;
     if(frame.header().type == EthernetHeader::TYPE_IPv4){
         InternetDatagram datagram;
         if(datagram.parse(frame.payload())==ParseResult::NoError){
@@ -72,21 +82,33 @@ optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &fra
         ARPMessage arp;
         if(arp.parse(frame.payload())==ParseResult::NoError){
             if(arp.opcode == ARPMessage::OPCODE_REQUEST){
+                if(arp.target_ip_address != _ip_address.ipv4_numeric()){
+                    return{};
+                }
                 ARPMessage rep_arp;
                 rep_arp.opcode = ARPMessage::OPCODE_REPLY;
                 rep_arp.sender_ip_address = _ip_address.ipv4_numeric();
                 rep_arp.sender_ethernet_address = _ethernet_address;
+                rep_arp.target_ip_address = arp.sender_ip_address;
+                rep_arp.target_ethernet_address = arp.sender_ethernet_address;
                 EthernetFrame new_frame;
                 new_frame.payload() = rep_arp.serialize();
                 new_frame.header().type = EthernetHeader::TYPE_ARP;
                 new_frame.header().dst = arp.sender_ethernet_address;
                 new_frame.header().src = _ethernet_address;
                 _frames_out.push(new_frame);
-            }else if(arp.opcode == ARPMessage::OPCODE_REPLY){
                 auto ip = arp.sender_ip_address;
                 auto eth_address = arp.sender_ethernet_address;
                 _ip2eth[ip] = eth_address;
                 _ip2tick[ip] = 0 ;
+            }else if(arp.opcode == ARPMessage::OPCODE_REPLY){
+                auto ip = arp.sender_ip_address;
+                auto eth_address = arp.sender_ethernet_address;
+                cerr << "in arp rev the ip is " << ip << "the eth_address is "<<"\n";
+                _ip2eth[ip] = eth_address;
+                _ip2tick[ip] = 0 ;
+                _arp_in_flight.erase(ip);
+                update_waiting_datagra();
             }
         }
     }
@@ -104,6 +126,15 @@ void NetworkInterface::tick(const size_t ms_since_last_tick) {
             iter++;
         }
     }
+    for(auto iter = _arp2tick.begin();iter!=_arp2tick.end();){
+        iter->second += ms_since_last_tick;
+        if(iter->second>5000){
+            _arp_in_flight.erase(iter->first);
+            iter = _arp2tick.erase(iter);
+        }else{
+            iter++;
+        }
+    }
 }
 
 
@@ -115,8 +146,17 @@ void NetworkInterface::tick(const size_t ms_since_last_tick) {
 
 
 bool NetworkInterface::should_ignore(const EthernetFrame &frame){
-    if(frame.header().dst != ETHERNET_BROADCAST || frame.header().dst != _ethernet_address){
-        return true;
+    if(frame.header().dst == ETHERNET_BROADCAST || frame.header().dst == _ethernet_address){
+        return false;
     }
-    return false;
+    return true;
+}
+
+void NetworkInterface::update_waiting_datagra() {
+    int cnt = _waiting_datagrams.size();
+    while(cnt--){
+        auto seg = _waiting_datagrams.front();
+        _waiting_datagrams.pop_front();
+        send_datagram(seg._data_gram,seg._next_hop);
+    }
 }

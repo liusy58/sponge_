@@ -50,10 +50,12 @@ class NetworkInterface {
     std::unordered_map<uint32_t,uint64_t>_ip2tick{};
 
     std::set<uint32_t> _arp_in_flight{};
-
-    std::vector<Waiting_Datagrame> _waiting_datagrams{};
+    std::unordered_map<uint32_t,uint64_t>_arp2tick{};
+    std::deque<Waiting_Datagrame> _waiting_datagrams{};
 
     bool should_ignore(const EthernetFrame &frame);
+
+    void update_waiting_datagra();
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses
     NetworkInterface(const EthernetAddress &ethernet_address, const Address &ip_address);
