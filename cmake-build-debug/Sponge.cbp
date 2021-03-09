@@ -259,6 +259,62 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="tcp_ip_ethernet">
+				<Option output="/home/lsy/sponge/cmake-build-debug/apps/tcp_ip_ethernet" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 tcp_ip_ethernet"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tcp_ip_ethernet/fast">
+				<Option output="/home/lsy/sponge/cmake-build-debug/apps/tcp_ip_ethernet" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 tcp_ip_ethernet/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="tcp_native">
 				<Option output="/home/lsy/sponge/cmake-build-debug/apps/tcp_native" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
@@ -1267,62 +1323,6 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="fsm_stream_reassembler_dup">
-				<Option output="/home/lsy/sponge/cmake-build-debug/tests/fsm_stream_reassembler_dup" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/home/lsy/sponge/libsponge/util"/>
-					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
-					<Add directory="/home/lsy/sponge/libsponge"/>
-					<Add directory="/usr/include/c++/8"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
-					<Add directory="/usr/include/c++/8/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 fsm_stream_reassembler_dup"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="fsm_stream_reassembler_dup/fast">
-				<Option output="/home/lsy/sponge/cmake-build-debug/tests/fsm_stream_reassembler_dup" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/home/lsy/sponge/libsponge/util"/>
-					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
-					<Add directory="/home/lsy/sponge/libsponge"/>
-					<Add directory="/usr/include/c++/8"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
-					<Add directory="/usr/include/c++/8/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 fsm_stream_reassembler_dup/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
 			<Target title="fsm_active_close">
 				<Option output="/home/lsy/sponge/cmake-build-debug/tests/fsm_active_close" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
@@ -1374,6 +1374,62 @@
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 fsm_active_close/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="send_transmit">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/send_transmit" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 send_transmit"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="send_transmit/fast">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/send_transmit" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 send_transmit/fast"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
@@ -2331,6 +2387,118 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="fsm_stream_reassembler_dup">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/fsm_stream_reassembler_dup" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 fsm_stream_reassembler_dup"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="fsm_stream_reassembler_dup/fast">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/fsm_stream_reassembler_dup" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 fsm_stream_reassembler_dup/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="net_interface">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/net_interface" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 net_interface"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="net_interface/fast">
+				<Option output="/home/lsy/sponge/cmake-build-debug/tests/net_interface" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 net_interface/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="byte_stream_one_write">
 				<Option output="/home/lsy/sponge/cmake-build-debug/tests/byte_stream_one_write" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
@@ -2438,62 +2606,6 @@
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 byte_stream_two_writes/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="send_transmit">
-				<Option output="/home/lsy/sponge/cmake-build-debug/tests/send_transmit" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/home/lsy/sponge/libsponge/util"/>
-					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
-					<Add directory="/home/lsy/sponge/libsponge"/>
-					<Add directory="/usr/include/c++/8"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
-					<Add directory="/usr/include/c++/8/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 send_transmit"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="send_transmit/fast">
-				<Option output="/home/lsy/sponge/cmake-build-debug/tests/send_transmit" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lsy/sponge/cmake-build-debug/tests"/>
-				<Option object_output="./"/>
-				<Option type="1"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/home/lsy/sponge/libsponge/util"/>
-					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
-					<Add directory="/home/lsy/sponge/libsponge"/>
-					<Add directory="/usr/include/c++/8"/>
-					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
-					<Add directory="/usr/include/c++/8/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
-					<Add directory="/usr/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 send_transmit/fast"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/tests/Makefile&quot;  VERBOSE=1 clean"/>
@@ -3349,6 +3461,9 @@
 		<Unit filename="/home/lsy/sponge/apps/tcp_benchmark.cc">
 			<Option target="tcp_benchmark"/>
 		</Unit>
+		<Unit filename="/home/lsy/sponge/apps/tcp_ip_ethernet.cc">
+			<Option target="tcp_ip_ethernet"/>
+		</Unit>
 		<Unit filename="/home/lsy/sponge/apps/tcp_ipv4.cc">
 			<Option target="tcp_ipv4"/>
 		</Unit>
@@ -3382,6 +3497,12 @@
 		<Unit filename="/home/lsy/sponge/libsponge/byte_stream.hh">
 			<Option target="sponge"/>
 		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/network_interface.cc">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/network_interface.hh">
+			<Option target="sponge"/>
+		</Unit>
 		<Unit filename="/home/lsy/sponge/libsponge/stream_reassembler.cc">
 			<Option target="sponge"/>
 		</Unit>
@@ -3392,6 +3513,24 @@
 			<Option target="sponge"/>
 		</Unit>
 		<Unit filename="/home/lsy/sponge/libsponge/tcp_connection.hh">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/arp_message.cc">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/arp_message.hh">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/ethernet_frame.cc">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/ethernet_frame.hh">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/ethernet_header.cc">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/ethernet_header.hh">
 			<Option target="sponge"/>
 		</Unit>
 		<Unit filename="/home/lsy/sponge/libsponge/tcp_helpers/fd_adapter.cc">
@@ -3597,6 +3736,15 @@
 		</Unit>
 		<Unit filename="/home/lsy/sponge/tests/ipv4_parser.cc">
 			<Option target="ipv4_parser"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/tests/net_interface.cc">
+			<Option target="net_interface"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/tests/network_interface_test_harness.cc">
+			<Option target="spongechecks"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/tests/network_interface_test_harness.hh">
+			<Option target="spongechecks"/>
 		</Unit>
 		<Unit filename="/home/lsy/sponge/tests/recv_close.cc">
 			<Option target="recv_close"/>

@@ -29,7 +29,6 @@ class StreamReassembler {
     // the data1 is the new data
     int type_overlap(Data data1,Data data2);
     void push2list(const std::string &data, const size_t index);
-    void write2stream();
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
@@ -68,6 +67,7 @@ class StreamReassembler {
     size_t window_size()const{
       return _output.remaining_capacity();
     }
+    void write2stream();
 
 };
 

@@ -236,6 +236,8 @@ void TCPSender::update_flights_in_flight(const WrappingInt32 ackno){
             }
         }
     }
+    string m = "after update the _segment_in_flight size is "+ to_string(_segment_in_flight.size())+"\n";
+    cerr<<m;
 }
 
 void TCPSender::send_totally_empty_seg(){

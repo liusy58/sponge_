@@ -154,8 +154,11 @@ void TCPConnection::fill_window(bool create_empty) {
         er = "the pid is "+ to_string(getpid())+"the segment_out size is "+to_string(ssegment_out.size())+"\n";
         cerr<<er;
         auto seg = ssegment_out.front();
-        ssegment_out.pop();
         if(_receiver.ackno().has_value()){
+            str = "In ackno the state is " + to_string(_receiver.state_summary())+"\n";
+            cerr<<str;
+            string ss = "pid is "+to_string(getpid())+"the seg seqno is"+to_string(seg.header().seqno.raw_value())+"   the ackno is "+ to_string(_receiver.ackno().value().raw_value()) + "\n";
+            cerr<<ss;
             seg.header().ack = true;
             seg.header().ackno = _receiver.ackno().value();
 
@@ -169,6 +172,7 @@ void TCPConnection::fill_window(bool create_empty) {
             seg.header().win = _receiver.window_size();
         }
         _segments_out.push(seg);
+        ssegment_out.pop();
     }
     set_linger_after_streams_finish();
 }

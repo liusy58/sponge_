@@ -13,6 +13,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
+
     uint64_t index = 0;
     auto header = seg.header();
     auto payload = seg.payload();
@@ -42,7 +43,7 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
 
 //! This is the beginning of the receiver's window, or in other words, the sequence number
 //! of the first byte in the stream that the receiver hasn't received.
-optional<WrappingInt32> TCPReceiver::ackno() const {
+optional<WrappingInt32> TCPReceiver::ackno()const  {
     string str = "In ackno the state is " + to_string(state_summary())+"\n";
     cerr <<str;
     switch (state_summary()){
