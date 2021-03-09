@@ -7,7 +7,8 @@
 
 #include <optional>
 #include <queue>
-
+#include <unordered_map>
+#include <set>
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
 
@@ -31,6 +32,11 @@
 //! and learns or replies as necessary.
 class NetworkInterface {
   private:
+    struct Waiting_Datagrame{
+        InternetDatagram _data_gram;
+        Address _next_hop;
+    };
+
     //! Ethernet (known as hardware, network-access-layer, or link-layer) address of the interface
     EthernetAddress _ethernet_address;
 
@@ -40,6 +46,14 @@ class NetworkInterface {
     //! outbound queue of Ethernet frames that the NetworkInterface wants sent
     std::queue<EthernetFrame> _frames_out{};
 
+    std::unordered_map<uint32_t,EthernetAddress> _ip2eth{};
+    std::unordered_map<uint32_t,uint64_t>_ip2tick{};
+
+    std::set<uint32_t> _arp_in_flight{};
+
+    std::vector<Waiting_Datagrame> _waiting_datagrams{};
+
+    bool should_ignore(const EthernetFrame &frame);
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses
     NetworkInterface(const EthernetAddress &ethernet_address, const Address &ip_address);
