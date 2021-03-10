@@ -483,6 +483,62 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="network_simulator">
+				<Option output="/home/lsy/sponge/cmake-build-debug/apps/network_simulator" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 network_simulator"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="network_simulator/fast">
+				<Option output="/home/lsy/sponge/cmake-build-debug/apps/network_simulator" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/lsy/sponge/libsponge/util"/>
+					<Add directory="/home/lsy/sponge/libsponge/tcp_helpers"/>
+					<Add directory="/home/lsy/sponge/libsponge"/>
+					<Add directory="/usr/include/c++/8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 network_simulator/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lsy/sponge/cmake-build-debug/apps/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="stream_copy">
 				<Option output="/home/lsy/sponge/cmake-build-debug/apps/libstream_copy.a" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/lsy/sponge/cmake-build-debug/apps"/>
@@ -3458,6 +3514,9 @@
 		<Unit filename="/home/lsy/sponge/apps/bidirectional_stream_copy.hh">
 			<Option target="stream_copy"/>
 		</Unit>
+		<Unit filename="/home/lsy/sponge/apps/network_simulator.cc">
+			<Option target="network_simulator"/>
+		</Unit>
 		<Unit filename="/home/lsy/sponge/apps/tcp_benchmark.cc">
 			<Option target="tcp_benchmark"/>
 		</Unit>
@@ -3501,6 +3560,12 @@
 			<Option target="sponge"/>
 		</Unit>
 		<Unit filename="/home/lsy/sponge/libsponge/network_interface.hh">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/router.cc">
+			<Option target="sponge"/>
+		</Unit>
+		<Unit filename="/home/lsy/sponge/libsponge/router.hh">
 			<Option target="sponge"/>
 		</Unit>
 		<Unit filename="/home/lsy/sponge/libsponge/stream_reassembler.cc">
